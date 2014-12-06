@@ -1,0 +1,247 @@
+<?php
+
+namespace Wearejh\MagentoComposerInstaller;
+
+use Composer\Composer;
+use Composer\DependencyResolver\Operation\OperationInterface;
+use Composer\EventDispatcher\EventSubscriberInterface;
+use Composer\Installer\InstallerEvent;
+use Composer\IO\IOInterface;
+use Composer\Plugin\PluginInterface;
+use Composer\Script\ScriptEvents;
+use Composer\Installer\InstallerEvents;
+use Composer\Script\CommandEvent;
+use Composer\Script\PackageEvent;
+use Composer\Util\Filesystem;
+use Composer\Package\PackageInterface;
+
+/**
+ * Class CoreInstaller
+ * @package Wearejh\MagentoComposerInstaller
+ * @author Aydin Hassan <aydin@hotmail.co.uk>
+ */
+class CoreManager implements PluginInterface, EventSubscriberInterface
+{
+    /**
+     * The type of packages this script should operate on
+     *
+     * @var string
+     */
+    protected $type = 'magento-core';
+
+    /**
+     * @var Composer
+     */
+    protected $composer;
+
+    /**
+     * @var IOInterface
+     */
+    protected $io;
+
+    /**
+     * Vendor Directory
+     *
+     * @var string
+     */
+    protected $vendorDir;
+
+    /**
+     * @var Filesystem
+     */
+    protected $filesystem;
+
+    /**
+     * Output Prefix
+     *
+     * @var string
+     */
+    protected $ioPrefix = '  - <comment>MagentoCoreInstaller: </comment>';
+
+    /**
+     * @param Composer $composer
+     * @param IOInterface $io
+     */
+    public function activate(Composer $composer, IOInterface $io)
+    {
+        $this->composer     = $composer;
+        $this->io           = $io;
+        $this->vendorDir    = rtrim($composer->getConfig()->get('vendor-dir'), '/');
+        $this->filesystem   = new Filesystem();
+    }
+
+    /**
+     * @param PackageInterface $package
+     * @return string
+     */
+    public function getInstallPath(PackageInterface $package)
+    {
+        $targetDir = $package->getTargetDir();
+
+        return $this->getPackageBasePath($package) . ($targetDir ? '/'.$targetDir : '');
+    }
+
+    /**
+     * @param PackageInterface $package
+     * @return string
+     */
+    protected function getPackageBasePath(PackageInterface $package)
+    {
+        $this->filesystem->ensureDirectoryExists($this->vendorDir);
+        $this->vendorDir = realpath($this->vendorDir);
+
+        return ($this->vendorDir ? $this->vendorDir.'/' : '') . $package->getPrettyName();
+    }
+
+    /**
+     * Tell event dispatcher what events we want to subscribe to
+     * @return array
+     */
+    public static function getSubscribedEvents()
+    {
+        return array(
+            InstallerEvents::POST_DEPENDENCIES_SOLVING => array(
+                array('checkCoreDependencies', 0)
+            ),
+            ScriptEvents::POST_PACKAGE_INSTALL => array(
+                array('installCore', 0)
+            ),
+            ScriptEvents::PRE_PACKAGE_UPDATE => array(
+                array('uninstallCore', 0)
+            ),
+            ScriptEvents::POST_PACKAGE_UPDATE => array(
+                array('installCore', 0)
+            ),
+            ScriptEvents::PRE_PACKAGE_UNINSTALL => array(
+                array('uninstallCore', 0)
+            ),
+        );
+    }
+
+    /**
+     * Check that there is only 1 core package required
+     */
+    public function checkCoreDependencies(InstallerEvent $event)
+    {
+        $installedCorePackages = array();
+        foreach ($event->getInstalledRepo()->getPackages() as $package) {
+            if ($package->getType() === $this->type) {
+                $installedCorePackages[$package->getName()] = $package;
+            }
+        }
+
+        $operations = array_filter($event->getOperations(), function (OperationInterface $o) {
+            return in_array($o->getJobType(), array('install', 'uninstall'));
+        });
+
+        foreach ($operations as $operation) {
+            $p = $operation->getPackage();
+            if ($p->getType() === $this->type) {
+                switch ($operation->getJobType()) {
+                    case "uninstall":
+                        unset($installedCorePackages[$p->getName()]);
+                        break;
+                    case "install":
+                        $installedCorePackages[$p->getName()] = $p;
+                        break;
+                }
+            }
+        }
+
+        if (count($installedCorePackages) > 1) {
+            throw new \RuntimeException("Cannot use more than 1 core package");
+        }
+    }
+
+
+    /**
+     * @param PackageEvent $event
+     */
+    public function installCore(PackageEvent $event)
+    {
+        switch ($event->getOperation()->getJobType()) {
+            case "install":
+                $package = $event->getOperation()->getPackage();
+                break;
+            case "update":
+                $package = $event->getOperation()->getTargetPackage();
+                break;
+        }
+
+        if ($package->getType() === $this->type) {
+            $options = new Options($this->composer->getPackage()->getExtra());
+            $this->installCorePackage($package, $options);
+        }
+    }
+
+    /**
+     * @param PackageInterface $corePackage
+     * @param Options $options
+     */
+    public function installCorePackage(PackageInterface $corePackage, Options $options)
+    {
+        $this->io->write(
+            sprintf(
+                '%s<info>Installing: "%s" version: "%s" to: "%s"</info>',
+                $this->ioPrefix,
+                $corePackage->getPrettyName(),
+                $corePackage->getVersion(),
+                $options->getMagentoRootDir()
+            )
+        );
+
+        $gitIgnore = new GitIgnore(
+            sprintf("%s/.gitignore", $options->getMagentoRootDir()),
+            $options->getIgnoreDirectories(),
+            $options->appendToGitIgnore()
+        );
+
+        $installer = new CoreInstaller($options->getDeployExcludes(), $gitIgnore);
+        $installer->install($this->getInstallPath($corePackage), $options->getMagentoRootDir());
+    }
+
+    /**
+     * @param PackageEvent $event
+     */
+    public function uninstallCore(PackageEvent $event)
+    {
+        switch ($event->getOperation()->getJobType()) {
+            case "update":
+                $package = $event->getOperation()->getInitialPackage();
+                break;
+            case "uninstall":
+                $package = $event->getOperation()->getPackage();
+                break;
+        }
+
+        if ($package->getType() === $this->type) {
+            $options = new Options($this->composer->getPackage()->getExtra());
+            $this->removeCorePackage($package, $options);
+        }
+    }
+
+    /**
+     * @param PackageInterface $corePackage
+     * @param Options $options
+     */
+    public function removeCorePackage(PackageInterface $corePackage, Options $options)
+    {
+        $source = $this->getInstallPath($corePackage);
+
+        $this->io->write(
+            sprintf(
+                '%s<info>Removing: "%s" version: "%s" from: %s</info>',
+                $this->ioPrefix,
+                $corePackage->getPrettyName(),
+                $corePackage->getVersion(),
+                $options->getMagentoRootDir()
+            )
+        );
+
+        $unInstaller = new CoreUnInstaller($this->filesystem);
+        if ($unInstaller->uninstall($source, $options->getMagentoRootDir())) {
+            $gitIgnore  = new GitIgnore(sprintf("%s/.gitignore", $options->getMagentoRootDir()), array(), false);
+            $gitIgnore->wipeOut();
+        }
+    }
+}

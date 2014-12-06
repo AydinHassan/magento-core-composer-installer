@@ -1,0 +1,26 @@
+{
+    "name": "wearejh/magento-composer-installer",
+    "type": "composer-plugin",
+    "require": {
+        "composer-plugin-api": "~1.0"
+    },
+    "require-dev": {
+        "squizlabs/php_codesniffer": "~1.5",
+        "composer/composer": "~1.0@dev",
+        "phpunit/phpunit": "~4.3"
+    },
+    "authors": [
+        {
+            "name": "Aydin Hassan",
+            "email": "aydin@hotmail.co.uk"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "Wearejh\\MagentoComposerInstaller\\": "src/"
+        }
+    },
+    "extra": {
+        "class": "\\Wearejh\\MagentoComposerInstaller\\CoreManager"
+    }
+}
