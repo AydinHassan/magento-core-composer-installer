@@ -23,7 +23,7 @@ class CoreInstallerTest extends \PHPUnit_Framework_TestCase
     {
         $this->gitIgnore = $this->getMockBuilder('AydinHassan\MagentoCoreComposerInstaller\GitIgnore')
             ->disableOriginalConstructor()
-            ->setMethods(array('addEntry', '__destruct'))
+            ->setMethods(array('__destruct'))
             ->getMock();
 
         $this->fileSystem           = new Filesystem();
@@ -73,27 +73,13 @@ class CoreInstallerTest extends \PHPUnit_Framework_TestCase
         mkdir(sprintf('%s/%s', $this->sourceFolder, dirname($file4)));
         touch(sprintf('%s/%s', $this->sourceFolder, $file4));
 
-//        $this->gitIgnore
-//            ->expects($this->at(0))
-//            ->method('addEntry')
-//            ->with('folder1/folder2/file4.txt');
-//
-//        $this->gitIgnore
-//            ->expects($this->at(1))
-//            ->method('addEntry')
-//            ->with('folder1/file2.txt');
-//
-//        $this->gitIgnore
-//            ->expects($this->at(2))
-//            ->method('addEntry')
-//            ->with('folder1/file3.txt');
-//
-//        $this->gitIgnore
-//            ->expects($this->at(3))
-//            ->method('addEntry')
-//            ->with('file1.txt');
-
         $this->installer->install($this->sourceFolder, $this->destinationFolder);
+
+        $entries = $this->gitIgnore->getEntries();
+        $expected = array($file1, $file2, $file3, $file4);
+
+        $res = array_diff($entries, $expected);
+        $this->assertEquals(0, count($res), 'Git ignore should contain the same rows.');
     }
 
     public function testIfFolderExistsInDestinationItemIsSkipped()
