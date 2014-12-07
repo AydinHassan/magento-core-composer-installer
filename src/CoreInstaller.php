@@ -1,13 +1,13 @@
 <?php
 
-namespace Wearejh\MagentoComposerInstaller;
+namespace AydinHassan\MagentoCoreComposerInstaller;
 
 use RecursiveIteratorIterator;
 use RecursiveDirectoryIterator;
 
 /**
  * Class CoreInstaller
- * @package Wearejh\MagentoComposerInstaller
+ * @package AydinHassan\MagentoCoreComposerInstaller
  * @author Aydin Hassan <aydin@hotmail.co.uk>
  */
 class CoreInstaller

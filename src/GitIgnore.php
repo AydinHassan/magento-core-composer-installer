@@ -1,10 +1,10 @@
 <?php
 
-namespace Wearejh\MagentoComposerInstaller;
+namespace AydinHassan\MagentoCoreComposerInstaller;
 
 /**
  * Class GitIgnore
- * @package Wearejh\MagentoComposerInstaller
+ * @package AydinHassan\MagentoCoreComposerInstaller
  * @author Aydin Hassan <aydin@hotmail.co.uk>
  */
 class GitIgnore
@@ -30,7 +30,7 @@ class GitIgnore
      * @param array $directoriesToIgnoreEntirely
      * @param bool $gitIgnoreAppend
      */
-    public function __construct($fileLocation, array $directoriesToIgnoreEntirely, $gitIgnoreAppend)
+    public function __construct($fileLocation, array $directoriesToIgnoreEntirely, $gitIgnoreAppend = false)
     {
         $this->gitIgnoreLocation = $fileLocation;
 
@@ -39,7 +39,7 @@ class GitIgnore
         } else {
 
             if ($gitIgnoreAppend) {
-                $this->lines = array_flip(file($fileLocation));
+                $this->lines = array_flip(file($fileLocation, FILE_IGNORE_NEW_LINES));
             }
         }
 
@@ -72,7 +72,7 @@ class GitIgnore
      */
     public function getEntries()
     {
-        return $this->lines;
+        return array_values(array_flip($this->lines));
     }
 
     /**

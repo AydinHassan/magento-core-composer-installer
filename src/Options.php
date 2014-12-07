@@ -1,10 +1,10 @@
 <?php
 
-namespace Wearejh\MagentoComposerInstaller;
+namespace AydinHassan\MagentoCoreComposerInstaller;
 
 /**
  * Class Options
- * @package Wearejh\MagentoComposerInstaller
+ * @package AydinHassan\MagentoCoreComposerInstaller
  * @author Aydin Hassan <aydin@hotmail.co.uk>
  */
 class Options
@@ -42,7 +42,6 @@ class Options
         'js/tiny_mce',
         'lib/Apache',
         'app/code/community/Phoenix/Moneybookers',
-
     );
 
     /**
@@ -72,12 +71,20 @@ class Options
 
         //merge excludes from root package composer.json file with default excludes
         if (isset($coreInstallerOptions['excludes'])) {
+
+            if (!is_array($coreInstallerOptions['excludes'])) {
+                throw new \InvalidArgumentException("excludes must be an array of files/directories to ignore");
+            }
             $this->deployExcludes = array_merge($this->deployExcludes, $coreInstallerOptions['excludes']);
         }
 
         //overwrite default ignore directories if some are specified in root package composer.json
-        if (isset($coreInstallerOptions['ignore-directories']) && is_array($packageExtra['ignore-directories'])) {
-            $this->ignoreDirectories = $packageExtra['ignore-directories'];
+        if (isset($coreInstallerOptions['ignore-directories'])) {
+
+            if (!is_array($coreInstallerOptions['ignore-directories'])) {
+                throw new \InvalidArgumentException("ignore-directories must be an array of files/directories");
+            }
+            $this->ignoreDirectories = $coreInstallerOptions['ignore-directories'];
         }
 
         if (isset($coreInstallerOptions['git-ignore-append'])) {

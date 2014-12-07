@@ -1,6 +1,6 @@
 <?php
 
-namespace Wearejh\MagentoComposerInstaller;
+namespace AydinHassan\MagentoCoreComposerInstaller;
 
 use Composer\Composer;
 use Composer\DependencyResolver\Operation\OperationInterface;
@@ -16,8 +16,8 @@ use Composer\Util\Filesystem;
 use Composer\Package\PackageInterface;
 
 /**
- * Class CoreInstaller
- * @package Wearejh\MagentoComposerInstaller
+ * Class CoreManager
+ * @package AydinHassan\MagentoCoreComposerInstaller
  * @author Aydin Hassan <aydin@hotmail.co.uk>
  */
 class CoreManager implements PluginInterface, EventSubscriberInterface

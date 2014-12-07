@@ -1,6 +1,6 @@
 <?php
 
-namespace Wearejh\MagentoComposerInstaller;
+namespace AydinHassan\MagentoCoreComposerInstaller;
 
 
 use Composer\Util\Filesystem;
@@ -9,7 +9,7 @@ use RecursiveDirectoryIterator;
 
 /**
  * Class CoreUnInstaller
- * @package Wearejh\MagentoComposerInstaller
+ * @package AydinHassan\MagentoCoreComposerInstaller
  * @author Aydin Hassan <aydin@hotmail.co.uk>
  */
 class CoreUnInstaller

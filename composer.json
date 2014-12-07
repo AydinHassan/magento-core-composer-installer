@@ -1,5 +1,5 @@
 {
-    "name": "wearejh/magento-composer-installer",
+    "name": "aydin-hassan/magento-composer-installer",
     "type": "composer-plugin",
     "require": {
         "composer-plugin-api": "~1.0"
@@ -17,10 +17,15 @@
     ],
     "autoload": {
         "psr-4": {
-            "Wearejh\\MagentoComposerInstaller\\": "src/"
+            "AydinHassan\\MagentoCoreComposerInstaller\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "AydinHassan\\MagentoCoreComposerInstallerTest\\": "test/"
         }
     },
     "extra": {
-        "class": "\\Wearejh\\MagentoComposerInstaller\\CoreManager"
+        "class": "\\MagentoComposerInstaller\\MagentoCoreComposerInstaller\\CoreManager"
     }
 }
