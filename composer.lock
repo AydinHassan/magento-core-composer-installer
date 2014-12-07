@@ -4,7 +4,7 @@
         "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "dba2edb891135fda059d472280c829a0",
+    "hash": "09d176f4256bcdc18c0a4a87e23872cc",
     "packages": [],
     "packages-dev": [
         {
@@ -13,12 +13,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/composer/composer.git",
-                "reference": "d249d0c1218a06a9380a97edee3b7a6b9e42d714"
+                "reference": "46d8e50bf373bbfe5d3274b26dc15e84644b7f91"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/composer/composer/zipball/d249d0c1218a06a9380a97edee3b7a6b9e42d714",
-                "reference": "d249d0c1218a06a9380a97edee3b7a6b9e42d714",
+                "url": "https://api.github.com/repos/composer/composer/zipball/46d8e50bf373bbfe5d3274b26dc15e84644b7f91",
+                "reference": "46d8e50bf373bbfe5d3274b26dc15e84644b7f91",
                 "shasum": ""
             },
             "require": {
@@ -73,7 +73,7 @@
                 "dependency",
                 "package"
             ],
-            "time": "2014-12-05 11:58:21"
+            "time": "2014-12-07 14:02:17"
         },
         {
             "name": "doctrine/instantiator",
