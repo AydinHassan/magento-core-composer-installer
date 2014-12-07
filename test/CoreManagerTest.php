@@ -41,11 +41,11 @@ class CoreManagerTest extends \PHPUnit_Framework_TestCase
         $this->tmpDir = sprintf("%s/magento-core-composer-installer", sys_get_temp_dir());
 
 
-        $this->config->merge([
-            'config' => [
+        $this->config->merge(array(
+            'config' => array(
                 'vendor-dir'    => $this->tmpDir . "/vendor",
-            ],
-        ]);
+            ),
+        ));
 
         $this->io = $this->getMock('Composer\IO\IOInterface');
         $this->repoManager = new RepositoryManager($this->io, $this->config);
@@ -100,7 +100,7 @@ class CoreManagerTest extends \PHPUnit_Framework_TestCase
 
         $l  = '  - <comment>MagentoCoreInstaller: </comment>';
         $l .= '<info>Installing: "magento/core-package" version: "1.0.0" to: "some/dir"</info>';
-        
+
         $this->io->expects($this->once())
             ->method('write')
             ->with($l);
