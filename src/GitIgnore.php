@@ -26,6 +26,11 @@ class GitIgnore
     protected $gitIgnoreLocation;
 
     /**
+     * @var bool
+     */
+    protected $hasChanges = false;
+
+    /**
      * @param string $fileLocation
      * @param array $directoriesToIgnoreEntirely
      * @param bool $gitIgnoreAppend
@@ -34,13 +39,8 @@ class GitIgnore
     {
         $this->gitIgnoreLocation = $fileLocation;
 
-        if (!file_exists($fileLocation)) {
-            touch($fileLocation);
-        } else {
-
-            if ($gitIgnoreAppend) {
-                $this->lines = array_flip(file($fileLocation, FILE_IGNORE_NEW_LINES));
-            }
+        if (file_exists($fileLocation) && $gitIgnoreAppend) {
+            $this->lines = array_flip(file($fileLocation, FILE_IGNORE_NEW_LINES));
         }
 
         $this->directoriesToIgnoreEntirely = $directoriesToIgnoreEntirely;
@@ -65,6 +65,8 @@ class GitIgnore
         if ($addToGitIgnore && !isset($this->lines[$file])) {
             $this->lines[$file] = $file;
         }
+
+        $this->hasChanges = true;
     }
 
     /**
@@ -81,6 +83,7 @@ class GitIgnore
     public function wipeOut()
     {
         $this->lines = array();
+        $this->hasChanges = true;
     }
 
     /**
@@ -88,6 +91,8 @@ class GitIgnore
      */
     public function __destruct()
     {
-        file_put_contents($this->gitIgnoreLocation, implode("\n", array_flip($this->lines)));
+        if ($this->hasChanges) {
+            file_put_contents($this->gitIgnoreLocation, implode("\n", array_flip($this->lines)));
+        }
     }
 }

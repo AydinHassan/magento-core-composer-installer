@@ -15,12 +15,14 @@ class GitIgnoreTest extends \PHPUnit_Framework_TestCase
 
     public function setUp()
     {
-        $this->tmpGitIgnore = sprintf("%s/%s.gitignore", sys_get_temp_dir(), get_class($this));
+        $this->tmpGitIgnore = sprintf("%s/magento-core-composer-installer/.gitignore", sys_get_temp_dir());
     }
 
     public function testIfFileNotExistsItIsCreated()
     {
-        new GitIgnore($this->tmpGitIgnore, array());
+        $gitIgnore = new GitIgnore($this->tmpGitIgnore, array());
+        $gitIgnore->addEntry("file1");
+        unset($gitIgnore);
 
         $this->assertFileExists($this->tmpGitIgnore);
     }
@@ -54,7 +56,7 @@ class GitIgnoreTest extends \PHPUnit_Framework_TestCase
     {
         $folders = array('folder1', 'folder2');
         $gitIgnore = new GitIgnore($this->tmpGitIgnore, $folders, true);
-        $this->assertFileExists($this->tmpGitIgnore);
+        $gitIgnore->addEntry('folder1/file1.txt');
         $this->assertSame($folders, $gitIgnore->getEntries());
         unset($gitIgnore);
         $this->assertEquals("folder1\nfolder2", file_get_contents($this->tmpGitIgnore));
@@ -85,8 +87,33 @@ class GitIgnoreTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($expected, $gitIgnore->getEntries());
     }
 
+    public function testIgnoreDirectoriesAreNotWrittenIfNoEntriesAreAdded()
+    {
+        $folders = array('folder1', 'folder2');
+        $gitIgnore = new GitIgnore($this->tmpGitIgnore, $folders, true);
+        $this->assertSame($folders, $gitIgnore->getEntries());
+        unset($gitIgnore);
+        $this->assertFileNotExists($this->tmpGitIgnore);
+    }
+
+    public function testGitIgnoreIsNotWrittenIfNoAdditions()
+    {
+        $lines = array('line1', 'line2');
+        file_put_contents($this->tmpGitIgnore, implode("\n", $lines));
+        $writeTime = filemtime($this->tmpGitIgnore);
+
+        $folders = array('folder1', 'folder2');
+        $gitIgnore = new GitIgnore($this->tmpGitIgnore, $folders, true);
+        unset($gitIgnore);
+
+        clearstatcache();
+        $this->assertEquals($writeTime, filemtime($this->tmpGitIgnore));
+    }
+
     public function tearDown()
     {
-        unlink($this->tmpGitIgnore);
+        if (file_exists($this->tmpGitIgnore)) {
+            unlink($this->tmpGitIgnore);
+        }
     }
 }

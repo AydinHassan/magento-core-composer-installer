@@ -14,14 +14,19 @@ class CoreUnInstallerTest extends \PHPUnit_Framework_TestCase
 {
     protected $unInstaller;
     protected $fileSystem;
-
+    protected $gitIgnore;
     protected $sourceFolder;
     protected $destinationFolder;
 
     public function setUp()
     {
+        $this->gitIgnore = $this->getMockBuilder('AydinHassan\MagentoCoreComposerInstaller\GitIgnore')
+            ->disableOriginalConstructor()
+            ->setMethods(array('wipeOut', '__destruct'))
+            ->getMock();
+
         $this->fileSystem           = new Filesystem();
-        $this->unInstaller          = new CoreUnInstaller($this->fileSystem);
+        $this->unInstaller          = new CoreUnInstaller($this->fileSystem, $this->gitIgnore);
         $this->sourceFolder         = sprintf("%s/magento-core-composer-installer/source", sys_get_temp_dir());
         $this->destinationFolder    = sprintf("%s/magento-core-composer-installer/dest", sys_get_temp_dir());
         mkdir($this->sourceFolder, 0777, true);
@@ -34,6 +39,10 @@ class CoreUnInstallerTest extends \PHPUnit_Framework_TestCase
         $this->createFile('file2.txt');
         $this->createFolder('folder1');
         $this->createFile('folder1/file3.txt');
+
+        $this->gitIgnore
+            ->expects($this->once())
+            ->method('wipeOut');
 
         $this->unInstaller->uninstall($this->sourceFolder, $this->destinationFolder);
         $this->assertTrue($this->fileSystem->isDirEmpty($this->destinationFolder));

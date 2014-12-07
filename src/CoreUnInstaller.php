@@ -16,24 +16,29 @@ class CoreUnInstaller
 {
 
     /**
-     * @var Filesystem|null
+     * @var Filesystem
      */
-    protected $fileSystem = null;
+    protected $fileSystem;
+
+    /**
+     * @var GitIgnore
+     */
+    protected $gitIgnore;
 
     /**
      * @param Filesystem $fileSystem
      */
-    public function __construct(Filesystem $fileSystem)
+    public function __construct(Filesystem $fileSystem, GitIgnore $gitIgnore)
     {
-        $this->fileSystem = $fileSystem;
+        $this->fileSystem   = $fileSystem;
+        $this->gitIgnore    = $gitIgnore;
     }
 
     /**
      * @param string $source
-     * @param $destination
-     * @return string bool
+     * @param string $destination
      */
-    public function uninstall($source, $destination)
+    public function unInstall($source, $destination)
     {
         $iterator = new RecursiveIteratorIterator(
             new RecursiveDirectoryIterator(
@@ -62,6 +67,6 @@ class CoreUnInstaller
             $this->fileSystem->unlink($destinationFile);
         }
 
-        return true;
+        $this->gitIgnore->wipeOut();
     }
 }
