@@ -176,19 +176,20 @@ Creating a core package
 I have provided a script which allows you to easily manage a mirror of Magento. It will work for both Community and Enterprise. The below instructions explain how to create a core package.
 
 1. Create a repository or clone an existing one: `cd && mkdir magento-mirror && git init`
-2. Download a version of Magento and extract it: `cd && tar -xzf magento.tar.gz 
+2. Download a version of Magento and extract it: `cd && tar -xzf magento.tar.gz`
 3. Download this script to your home directory: `cd && curl https://gist.githubusercontent.com/AydinHassan/b2934f9c4a4e17385294/raw/8c1697655e532d63166f12f44d71c4e0d6483cc5/add-magento-version.php -o add-magento-version.php`
-4. Run it with the locations of your repository and the extracted Magento code: `php add-magento-version.php ~/magento-mirror ~/magento
+4. Run it with the locations of your repository and the extracted Magento code: `php add-magento-version.php ~/magento-mirror ~/magento`
 5. The new version will be commited & tagged. You can now push this up to the remote.
 
 The script will figure out the version and edition of Magento from the source. It will create branches and tags based on those versions. 
 
 Branches are major.minor:
 
-so 1.9.0.0, 1.9.0.1, 1.9.10 all go in the 1.9 branch
-1.10.0.0 would cause a new 1.10 branch to be created.
+so `1.9.0.0`, `1.9.0.1` & `1.9.10` all go in the `1.9` branch
+
+`1.10.0.0` would cause a new `1.10` branch to be created.
  
-1.10 will be branched of 1.9 so you can diff them easily
+`1.10` will be branched of `1.9` so you can diff them easily
 
 
 Running the Tests
