@@ -1,5 +1,5 @@
 {
-    "name": "aydin-hassan/magento-composer-installer",
+    "name": "aydin-hassan/magento-core-composer-installer",
     "type": "composer-plugin",
     "require": {
         "composer-plugin-api": "~1.0"
