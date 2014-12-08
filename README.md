@@ -27,7 +27,7 @@ is automatically updated. Further to this, in your project root you could ignore
 This would mean that you can install, update & remove Magento core without any un-tracked files showing in your
 repository.
 
-Now updating Magento Core is easy, simply change your require to "magento/magento": 1.10.0 or whatever the newest version is and run `composer update`!
+Now updating Magento Core is easy, simply change your require to `"magento/magento": 1.10.0` or whatever the newest version is and run `composer update`!
 
 Compatibility
 -------------
