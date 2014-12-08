@@ -57,7 +57,7 @@ You can create your own public or private Magento repository to host the differe
 You should tag each version as the version it is. The `type` key is important. The Magento Core Composer Installer
 will only install packages which have a type of `magento-core`.
 
-Read [here](#Creating a core package) to see how you can create your own Magento Source Code Repository.
+Read [here](#creating-a-core-package) to see how you can create your own Magento Source Code Repository.
 
 To use the Magento package you will have to add the repository to your projects `composer.json` file:
 
