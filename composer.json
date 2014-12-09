@@ -26,6 +26,6 @@
         }
     },
     "extra": {
-        "class": "\\MagentoComposerInstaller\\MagentoCoreComposerInstaller\\CoreManager"
+        "class": "\\AydinHassan\\MagentoCoreComposerInstaller\\CoreManager"
     }
 }
