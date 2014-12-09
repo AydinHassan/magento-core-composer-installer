@@ -4,6 +4,7 @@ namespace AydinHassan\MagentoCoreComposerInstallerTest;
 
 use AydinHassan\MagentoCoreComposerInstaller\CoreUnInstaller;
 use Composer\Util\Filesystem;
+use org\bovigo\vfs\vfsStream;
 
 /**
  * Class CoreUnInstallerTest
@@ -13,85 +14,90 @@ use Composer\Util\Filesystem;
 class CoreUnInstallerTest extends \PHPUnit_Framework_TestCase
 {
     protected $unInstaller;
-    protected $fileSystem;
     protected $gitIgnore;
-    protected $sourceFolder;
-    protected $destinationFolder;
+    protected $root;
 
     public function setUp()
     {
         $this->gitIgnore = $this->getMockBuilder('AydinHassan\MagentoCoreComposerInstaller\GitIgnore')
             ->disableOriginalConstructor()
-            ->setMethods(array('wipeOut', '__destruct'))
+            ->setMethods(array('removeEntry', 'removeIgnoreDirectories', '__destruct'))
             ->getMock();
 
-        $this->fileSystem           = new Filesystem();
-        $this->unInstaller          = new CoreUnInstaller($this->fileSystem, $this->gitIgnore);
-        $this->sourceFolder         = sprintf("%s/magento-core-composer-installer/source", sys_get_temp_dir());
-        $this->destinationFolder    = sprintf("%s/magento-core-composer-installer/dest", sys_get_temp_dir());
-        mkdir($this->sourceFolder, 0777, true);
-        mkdir($this->destinationFolder, 0777, true);
+        $this->unInstaller = new CoreUnInstaller(new Filesystem, $this->gitIgnore);
+        $this->root        = vfsStream::setup('root', null, array('source' => array(), 'destination' => array()));
     }
 
-    public function testUninstallRemovesAllFilesWhichExistInSource()
+    /**
+     * Create a directory structure for us to work on
+     */
+    private function createDirStructure()
     {
-        $this->createFile('file1.txt');
-        $this->createFile('file2.txt');
-        $this->createFolder('folder1');
-        $this->createFile('folder1/file3.txt');
+        vfsStream::newFile('file1.txt')->at($this->root->getChild('source'));
+        vfsStream::newFile('file1.txt')->at($this->root->getChild('destination'));
+        vfsStream::newFile('file2.txt')->at($this->root->getChild('source'));
+        vfsStream::newFile('file2.txt')->at($this->root->getChild('destination'));
+        vfsStream::newDirectory('folder1')->at($this->root->getChild('source'));
+        vfsStream::newDirectory('folder1')->at($this->root->getChild('destination'));
+        vfsStream::newFile('file3.txt')->at($this->root->getChild('source/folder1'));
+        vfsStream::newFile('file3.txt')->at($this->root->getChild('destination/folder1'));
+    }
+
+    public function testUninstallRemovesAllFilesWhichExistInSourceAndRemovesEntriesFromGitIgnore()
+    {
+        $this->createDirStructure();
+
+        $this->gitIgnore
+            ->expects($this->at(0))
+            ->method('removeEntry')
+            ->with('file1.txt');
+
+        $this->gitIgnore
+            ->expects($this->at(1))
+            ->method('removeEntry')
+            ->with('file2.txt');
+
+        $this->gitIgnore
+            ->expects($this->at(2))
+            ->method('removeEntry')
+            ->with('folder1/file3.txt');
 
         $this->gitIgnore
             ->expects($this->once())
-            ->method('wipeOut');
+            ->method('removeIgnoreDirectories');
 
-        $this->unInstaller->uninstall($this->sourceFolder, $this->destinationFolder);
-        $this->assertTrue($this->fileSystem->isDirEmpty($this->destinationFolder));
+        $this->unInstaller->unInstall(vfsStream::url('root/source'), vfsStream::url('root/destination'));
+
+        $this->assertFalse($this->root->hasChild('destination/file1.txt'));
+        $this->assertFalse($this->root->hasChild('destination/file2.txt'));
+        $this->assertFalse($this->root->hasChild('destination/folder1/file3.txt'));
+        $this->assertEmpty($this->gitIgnore->getEntries());
     }
 
     public function testUninstallKeepsFoldersWhichOnlyExistInDestination()
     {
-        $this->createFile('file1.txt');
-        $this->createFile('file2.txt');
-        $this->createFolder('folder1');
-        $this->createFile('folder1/file3.txt');
-        touch(sprintf('%s/folder1/file4.txt', $this->destinationFolder));
+        $this->createDirStructure();
 
-        $this->unInstaller->uninstall($this->sourceFolder, $this->destinationFolder);
+        vfsStream::newFile('file4.txt')->at($this->root->getChild('destination/folder1'));
 
-        $this->assertFileExists(sprintf('%s/folder1/file4.txt', $this->destinationFolder));
-        $this->assertFileNotExists(sprintf('%s/folder1/file3.txt', $this->destinationFolder));
-        $this->assertFileNotExists(sprintf('%s/file1.txt', $this->destinationFolder));
-        $this->assertFileNotExists(sprintf('%s/file2.txt', $this->destinationFolder));
+        $this->unInstaller->unInstall(vfsStream::url('root/source'), vfsStream::url('root/destination'));
+
+        $this->assertTrue($this->root->hasChild('destination/folder1/file4.txt'));
+        $this->assertFalse($this->root->hasChild('destination/file1.txt'));
+        $this->assertFalse($this->root->hasChild('destination/file2.txt'));
+        $this->assertFalse($this->root->hasChild('destination/folder1/file3.txt'));
     }
 
     public function testFileIsSkippedIfItDoesNotExistInDestination()
     {
-        $this->createFile('file1.txt');
-        $this->createFile('file2.txt');
-        $this->createFolder('folder1');
-        $this->createFile('folder1/file3.txt');
-        touch(sprintf('%s/folder1/file4.txt', $this->sourceFolder));
+        $this->createDirStructure();
+        vfsStream::newFile('file4')->at($this->root->getChild('source'));
 
-        $this->unInstaller->uninstall($this->sourceFolder, $this->destinationFolder);
-        $this->assertTrue($this->fileSystem->isDirEmpty($this->destinationFolder));
-    }
+        $this->unInstaller->unInstall(vfsStream::url('root/source'), vfsStream::url('root/destination'));
 
-    protected function createFile($file)
-    {
-        touch(sprintf('%s/%s', $this->sourceFolder, $file));
-        touch(sprintf('%s/%s', $this->destinationFolder, $file));
-    }
-
-    protected function createFolder($folder)
-    {
-        mkdir(sprintf('%s/%s', $this->sourceFolder, $folder));
-        mkdir(sprintf('%s/%s', $this->destinationFolder, $folder));
-    }
-
-    public function tearDown()
-    {
-        $fs = new Filesystem();
-        $fs->removeDirectory($this->sourceFolder);
-        $fs->removeDirectory($this->destinationFolder);
+        $this->assertFalse($this->root->hasChild('destination/file4.txt'));
+        $this->assertFalse($this->root->hasChild('destination/file1.txt'));
+        $this->assertFalse($this->root->hasChild('destination/file2.txt'));
+        $this->assertFalse($this->root->hasChild('destination/folder1/file3.txt'));
     }
 }

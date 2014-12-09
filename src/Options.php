@@ -50,7 +50,7 @@ class Options
      *
      * @var bool
      */
-    protected $appendToGitIgnore = false;
+    protected $appendToGitIgnore = true;
 
     /**
      * Magento Root Directory

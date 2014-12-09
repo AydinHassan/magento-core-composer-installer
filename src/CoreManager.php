@@ -173,7 +173,6 @@ class CoreManager implements PluginInterface, EventSubscriberInterface
 
         if ($package->getType() === $this->type) {
             $options = new Options($this->composer->getPackage()->getExtra());
-
             $gitIgnore = new GitIgnore(
                 sprintf("%s/.gitignore", $options->getMagentoRootDir()),
                 $options->getIgnoreDirectories(),
@@ -220,9 +219,13 @@ class CoreManager implements PluginInterface, EventSubscriberInterface
         }
 
         if ($package->getType() === $this->type) {
-            $options        = new Options($this->composer->getPackage()->getExtra());
-            $gitIgnore      = new GitIgnore(sprintf("%s/.gitignore", $options->getMagentoRootDir()), array(), false);
-            $unInstaller    = new CoreUnInstaller($this->filesystem, $gitIgnore);
+            $options = new Options($this->composer->getPackage()->getExtra());
+            $gitIgnore = new GitIgnore(
+                sprintf("%s/.gitignore", $options->getMagentoRootDir()),
+                $options->getIgnoreDirectories(),
+                $options->appendToGitIgnore()
+            );
+            $unInstaller = new CoreUnInstaller($this->filesystem, $gitIgnore);
             $this->removeCorePackage($package, $unInstaller, $options);
         }
     }

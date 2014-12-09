@@ -16,7 +16,7 @@ class CoreInstaller
     /**
      * @var GitIgnore
      */
-    protected $gitIgnore = true;
+    protected $gitIgnore;
 
     /**
      * @var array
@@ -27,7 +27,7 @@ class CoreInstaller
      * @param array $excludes
      * @param GitIgnore $gitIgnore
      */
-    public function __construct(array $excludes, GitIgnore $gitIgnore = null)
+    public function __construct(array $excludes, GitIgnore $gitIgnore)
     {
         $this->gitIgnore    = $gitIgnore;
         $this->excludes     = $excludes;
@@ -64,10 +64,7 @@ class CoreInstaller
             }
 
             copy($item, $destinationFile);
-
-            if ($this->gitIgnore) {
-                $this->gitIgnore->addEntry($iterator->getSubPathName());
-            }
+            $this->gitIgnore->addEntry($iterator->getSubPathName());
         }
     }
 
