@@ -64,8 +64,8 @@ To use the Magento package you will have to add the repository to your projects 
     "repositories": [
         {
             "type": "vcs",
-            "url": "git@bitbucket.org:somevendor/magento.git"
-        },
+            "url": "git@github.com:AydinHassan/magento-community.git"
+        }
     ],
     
 Then you can do:
@@ -94,8 +94,8 @@ Overall your projects `composer.json` should look something like:
         "repositories": [
             {
                 "type": "vcs",
-                "url": "git@bitbucket.org:somevendor/magento.git"
-            },
+                "url": "git@github.com:AydinHassan/magento-community.git"
+            }
         ],
         "extra" {
             "magento-root-dir": "htdocs"
