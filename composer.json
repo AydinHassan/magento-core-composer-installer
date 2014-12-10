@@ -2,13 +2,13 @@
     "name": "aydin-hassan/magento-core-composer-installer",
     "type": "composer-plugin",
     "require": {
-        "composer-plugin-api": "~1.0",
-        "mikey179/vfsStream": "~1.4"
+        "composer-plugin-api": "~1.0"
     },
     "require-dev": {
         "squizlabs/php_codesniffer": "~1.5",
         "composer/composer": "~1.0@dev",
-        "phpunit/phpunit": "~4.3"
+        "phpunit/phpunit": "~4.3",
+        "mikey179/vfsStream": "~1.4"
     },
     "authors": [
         {
