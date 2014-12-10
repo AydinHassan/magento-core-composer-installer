@@ -3,6 +3,7 @@
 namespace AydinHassan\MagentoCoreComposerInstallerTest;
 
 use AydinHassan\MagentoCoreComposerInstaller\GitIgnore;
+use org\bovigo\vfs\vfsStream;
 
 /**
  * Class GitIgnoreTest
@@ -11,60 +12,61 @@ use AydinHassan\MagentoCoreComposerInstaller\GitIgnore;
  */
 class GitIgnoreTest extends \PHPUnit_Framework_TestCase
 {
-    protected $tmpGitIgnore;
+    protected $gitIgnoreFile;
 
     public function setUp()
     {
-        $this->tmpGitIgnore = sprintf("%s/magento-core-composer-installer/.gitignore", sys_get_temp_dir());
+        vfsStream::setup('root');
+        $this->gitIgnoreFile = vfsStream::url('root/.gitignore');
     }
 
     public function testIfFileNotExistsItIsCreated()
     {
-        $gitIgnore = new GitIgnore($this->tmpGitIgnore, array());
+        $gitIgnore = new GitIgnore($this->gitIgnoreFile, array());
         $gitIgnore->addEntry("file1");
         unset($gitIgnore);
 
-        $this->assertFileExists($this->tmpGitIgnore);
+        $this->assertFileExists($this->gitIgnoreFile);
     }
 
     public function testIfFileExistsExistingLinesAreLoaded()
     {
         $lines = array('line1', 'line2');
-        file_put_contents($this->tmpGitIgnore, implode("\n", $lines));
+        file_put_contents($this->gitIgnoreFile, implode("\n", $lines));
 
-        $gitIgnore = new GitIgnore($this->tmpGitIgnore, array(), true);
+        $gitIgnore = new GitIgnore($this->gitIgnoreFile, array(), true);
 
-        $this->assertFileExists($this->tmpGitIgnore);
+        $this->assertFileExists($this->gitIgnoreFile);
         $this->assertSame($lines, $gitIgnore->getEntries());
     }
 
     public function testWipeOutRemovesAllEntries()
     {
         $lines = array('line1', 'line2');
-        file_put_contents($this->tmpGitIgnore, implode("\n", $lines));
+        file_put_contents($this->gitIgnoreFile, implode("\n", $lines));
 
-        $gitIgnore = new GitIgnore($this->tmpGitIgnore, array(), true);
+        $gitIgnore = new GitIgnore($this->gitIgnoreFile, array(), true);
         $gitIgnore->wipeOut();
 
-        $this->assertFileExists($this->tmpGitIgnore);
+        $this->assertFileExists($this->gitIgnoreFile);
         $this->assertSame(array(), $gitIgnore->getEntries());
         unset($gitIgnore);
-        $this->assertEquals("", file_get_contents($this->tmpGitIgnore));
+        $this->assertEquals("", file_get_contents($this->gitIgnoreFile));
     }
 
     public function testIgnoreDirectoriesAreAddedToGitIgnore()
     {
         $folders = array('folder1', 'folder2');
-        $gitIgnore = new GitIgnore($this->tmpGitIgnore, $folders, true);
+        $gitIgnore = new GitIgnore($this->gitIgnoreFile, $folders, true);
         $gitIgnore->addEntry('folder1/file1.txt');
         $this->assertSame($folders, $gitIgnore->getEntries());
         unset($gitIgnore);
-        $this->assertEquals("folder1\nfolder2", file_get_contents($this->tmpGitIgnore));
+        $this->assertEquals("folder1\nfolder2", file_get_contents($this->gitIgnoreFile));
     }
 
     public function testAddEntryDoesNotAddDuplicates()
     {
-        $gitIgnore = new GitIgnore($this->tmpGitIgnore, array(), true);
+        $gitIgnore = new GitIgnore($this->gitIgnoreFile, array(), true);
         $gitIgnore->addEntry("file1.txt");
         $gitIgnore->addEntry("file1.txt");
         $this->assertCount(1, $gitIgnore->getEntries());
@@ -73,7 +75,7 @@ class GitIgnoreTest extends \PHPUnit_Framework_TestCase
     public function testAddEntryDoesNotAddFileOrDirectoryIfItIsInsideAnIgnoredDirectory()
     {
         $ignoreDirs = array("dir1", "dir2/lol/");
-        $gitIgnore = new GitIgnore($this->tmpGitIgnore, $ignoreDirs);
+        $gitIgnore = new GitIgnore($this->gitIgnoreFile, $ignoreDirs);
         $gitIgnore->addEntry("dir1/file1.txt");
         $gitIgnore->addEntry("dir2/lol/file2.txt");
         $gitIgnore->addEntry("dir2/file3.txt");
@@ -90,30 +92,42 @@ class GitIgnoreTest extends \PHPUnit_Framework_TestCase
     public function testIgnoreDirectoriesAreNotWrittenIfNoEntriesAreAdded()
     {
         $folders = array('folder1', 'folder2');
-        $gitIgnore = new GitIgnore($this->tmpGitIgnore, $folders, true);
+        $gitIgnore = new GitIgnore($this->gitIgnoreFile, $folders, true);
         $this->assertSame($folders, $gitIgnore->getEntries());
         unset($gitIgnore);
-        $this->assertFileNotExists($this->tmpGitIgnore);
+        $this->assertFileNotExists($this->gitIgnoreFile);
     }
 
     public function testGitIgnoreIsNotWrittenIfNoAdditions()
     {
         $lines = array('line1', 'line2');
-        file_put_contents($this->tmpGitIgnore, implode("\n", $lines));
-        $writeTime = filemtime($this->tmpGitIgnore);
+        file_put_contents($this->gitIgnoreFile, implode("\n", $lines));
+        $writeTime = filemtime($this->gitIgnoreFile);
 
         $folders = array('folder1', 'folder2');
-        $gitIgnore = new GitIgnore($this->tmpGitIgnore, $folders, true);
+        $gitIgnore = new GitIgnore($this->gitIgnoreFile, $folders, true);
         unset($gitIgnore);
 
         clearstatcache();
-        $this->assertEquals($writeTime, filemtime($this->tmpGitIgnore));
+        $this->assertEquals($writeTime, filemtime($this->gitIgnoreFile));
     }
 
-    public function tearDown()
+    public function testCanRemoveEntry()
     {
-        if (file_exists($this->tmpGitIgnore)) {
-            unlink($this->tmpGitIgnore);
-        }
+        $lines = array('line1', 'line2');
+        file_put_contents($this->gitIgnoreFile, implode("\n", $lines));
+
+        $gitIgnore = new GitIgnore($this->gitIgnoreFile, array(), true);
+        $gitIgnore->removeEntry('line1');
+
+        $this->assertEquals(array('line2'), $gitIgnore->getEntries());
+    }
+
+    public function testRemoveIgnoreDirectoriesSuccessfullyRemovesEntries()
+    {
+        $gitIgnore = new GitIgnore($this->gitIgnoreFile, array('line1', 'line2'));
+        $this->assertEquals(array('line1', 'line2'), $gitIgnore->getEntries());
+        $gitIgnore->removeIgnoreDirectories();
+        $this->assertEquals(array(), $gitIgnore->getEntries());
     }
 }

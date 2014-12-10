@@ -35,7 +35,7 @@ class GitIgnore
      * @param array $directoriesToIgnoreEntirely
      * @param bool $gitIgnoreAppend
      */
-    public function __construct($fileLocation, array $directoriesToIgnoreEntirely, $gitIgnoreAppend = false)
+    public function __construct($fileLocation, array $directoriesToIgnoreEntirely, $gitIgnoreAppend = true)
     {
         $this->gitIgnoreLocation = $fileLocation;
 
@@ -67,6 +67,27 @@ class GitIgnore
         }
 
         $this->hasChanges = true;
+    }
+
+    /**
+     * @param string $file
+     */
+    public function removeEntry($file)
+    {
+        if (isset($this->lines[$file])) {
+            unset($this->lines[$file]);
+            $this->hasChanges = true;
+        }
+    }
+
+    /**
+     * Remove all the directories to ignore
+     */
+    public function removeIgnoreDirectories()
+    {
+        foreach ($this->directoriesToIgnoreEntirely as $directory) {
+            $this->removeEntry($directory);
+        }
     }
 
     /**

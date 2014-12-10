@@ -16,17 +16,18 @@ class CoreUnInstaller
 {
 
     /**
-     * @var Filesystem
-     */
-    protected $fileSystem;
-
-    /**
      * @var GitIgnore
      */
     protected $gitIgnore;
 
     /**
+     * @var Filesystem
+     */
+    protected $fileSystem;
+
+    /**
      * @param Filesystem $fileSystem
+     * @param GitIgnore $gitIgnore
      */
     public function __construct(Filesystem $fileSystem, GitIgnore $gitIgnore)
     {
@@ -52,6 +53,7 @@ class CoreUnInstaller
             $destinationFile = sprintf("%s/%s", $destination, $iterator->getSubPathName());
 
             if (!file_exists($destinationFile)) {
+                $this->gitIgnore->removeEntry($iterator->getSubPathName());
                 continue;
             }
 
@@ -65,8 +67,9 @@ class CoreUnInstaller
             }
 
             $this->fileSystem->unlink($destinationFile);
+            $this->gitIgnore->removeEntry($iterator->getSubPathName());
         }
 
-        $this->gitIgnore->wipeOut();
+        $this->gitIgnore->removeIgnoreDirectories();
     }
 }

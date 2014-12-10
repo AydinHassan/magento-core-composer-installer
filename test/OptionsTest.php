@@ -15,7 +15,7 @@ class OptionsTest extends \PHPUnit_Framework_TestCase
     {
         $options = new Options(array('magento-root-dir' => '/'));
 
-        $this->assertFalse($options->appendToGitIgnore());
+        $this->assertTrue($options->appendToGitIgnore());
         $this->assertSame("", $options->getMagentoRootDir());
         $this->assertSame(array(".git"), $options->getDeployExcludes());
         $this->assertInternalType('array', $options->getIgnoreDirectories());

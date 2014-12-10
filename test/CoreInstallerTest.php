@@ -3,7 +3,7 @@
 namespace AydinHassan\MagentoCoreComposerInstallerTest;
 
 use AydinHassan\MagentoCoreComposerInstaller\CoreInstaller;
-use Composer\Util\Filesystem;
+use org\bovigo\vfs\vfsStream;
 
 /**
  * Class CoreInstallerTest
@@ -13,113 +13,90 @@ use Composer\Util\Filesystem;
 class CoreInstallerTest extends \PHPUnit_Framework_TestCase
 {
     protected $installer;
-    protected $fileSystem;
     protected $gitIgnore;
-
-    protected $sourceFolder;
-    protected $destinationFolder;
+    protected $root;
 
     public function setUp()
     {
         $this->gitIgnore = $this->getMockBuilder('AydinHassan\MagentoCoreComposerInstaller\GitIgnore')
             ->disableOriginalConstructor()
-            ->setMethods(array('__destruct'))
+            ->setMethods(array('addEntry', '__destruct'))
             ->getMock();
 
-        $this->fileSystem           = new Filesystem();
-        $this->installer            = new CoreInstaller(array(), $this->gitIgnore);
-        $this->sourceFolder         = sprintf("%s/magento-core-composer-installer/source", sys_get_temp_dir());
-        $this->destinationFolder    = sprintf("%s/magento-core-composer-installer/dest", sys_get_temp_dir());
-        mkdir($this->sourceFolder, 0777, true);
-        mkdir($this->destinationFolder, 0777, true);
+        $this->installer = new CoreInstaller(array(), $this->gitIgnore);
+        $this->root      = vfsStream::setup('root', null, array('source' => array(), 'destination' => array()));
     }
 
-    public function testInstallerCopiesAllFiles()
+    public function testInstallerCopiesAllFilesAndAppendsToGitIgnore()
     {
-        //creating without gitignore object
-        $this->installer = new CoreInstaller(array());
+        $this->installer = new CoreInstaller(array(), $this->gitIgnore);
 
-        $file1 = 'file1.txt';
-        $file2 = 'folder1/file2.txt';
-        $file3 = 'folder1/file3.txt';
-        $file4 = 'folder1/folder2/file4.txt';
+        $source = $this->root->getChild('source');
+        vfsStream::newFile('file1.txt')->at($source);
+        vfsStream::newDirectory('folder1')->at($source);
+        vfsStream::newFile('file2.txt')->at($source->getChild('folder1'));
+        vfsStream::newFile('file3.txt')->at($source->getChild('folder1'));
+        vfsStream::newDirectory('folder2')->at($source->getChild('folder1'));
+        vfsStream::newFile('file4.txt')->at($source->getChild('folder1/folder2'));
 
-        mkdir(sprintf('%s/%s', $this->sourceFolder, dirname($file2)));
-        touch(sprintf('%s/%s', $this->sourceFolder, $file1));
-        touch(sprintf('%s/%s', $this->sourceFolder, $file2));
-        touch(sprintf('%s/%s', $this->sourceFolder, $file3));
-        mkdir(sprintf('%s/%s', $this->sourceFolder, dirname($file4)));
-        touch(sprintf('%s/%s', $this->sourceFolder, $file4));
+        $this->gitIgnore
+            ->expects($this->at(0))
+            ->method('addEntry')
+            ->with('file1.txt');
 
-        $this->installer->install($this->sourceFolder, $this->destinationFolder);
+        $this->gitIgnore
+            ->expects($this->at(1))
+            ->method('addEntry')
+            ->with('folder1/file2.txt');
 
-        $this->assertFileExists(sprintf('%s/%s', $this->destinationFolder, $file1));
-        $this->assertFileExists(sprintf('%s/%s', $this->destinationFolder, $file2));
-        $this->assertFileExists(sprintf('%s/%s', $this->destinationFolder, $file3));
-        $this->assertFileExists(sprintf('%s/%s', $this->destinationFolder, $file4));
-    }
+        $this->gitIgnore
+            ->expects($this->at(2))
+            ->method('addEntry')
+            ->with('folder1/file3.txt');
 
-    public function testIfGitIgnorePresentOnlyFilesAreAppended()
-    {
-        $file1 = 'file1.txt';
-        $file2 = 'folder1/file2.txt';
-        $file3 = 'folder1/file3.txt';
-        $file4 = 'folder1/folder2/file4.txt';
+        $this->gitIgnore
+            ->expects($this->at(3))
+            ->method('addEntry')
+            ->with('folder1/folder2/file4.txt');
 
-        mkdir(sprintf('%s/%s', $this->sourceFolder, dirname($file2)));
-        touch(sprintf('%s/%s', $this->sourceFolder, $file1));
-        touch(sprintf('%s/%s', $this->sourceFolder, $file2));
-        touch(sprintf('%s/%s', $this->sourceFolder, $file3));
-        mkdir(sprintf('%s/%s', $this->sourceFolder, dirname($file4)));
-        touch(sprintf('%s/%s', $this->sourceFolder, $file4));
+        $this->installer->install(vfsStream::url('root/source'), vfsStream::url('root/destination'));
 
-        $this->installer->install($this->sourceFolder, $this->destinationFolder);
-
-        $entries = $this->gitIgnore->getEntries();
-        $expected = array($file1, $file2, $file3, $file4);
-
-        $res = array_diff($entries, $expected);
-        $this->assertEquals(0, count($res), 'Git ignore should contain the same rows.');
+        $this->assertTrue($this->root->hasChild('destination/file1.txt'));
+        $this->assertTrue($this->root->hasChild('destination/folder1/file2.txt'));
+        $this->assertTrue($this->root->hasChild('destination/folder1/file3.txt'));
+        $this->assertTrue($this->root->hasChild('destination/folder1/folder2/file4.txt'));
     }
 
     public function testIfFolderExistsInDestinationItemIsSkipped()
     {
-        $this->installer = new CoreInstaller(array());
-        $file1 = 'folder1/file1.txt';
+        $this->installer = new CoreInstaller(array(), $this->gitIgnore);
 
-        mkdir(sprintf('%s/%s', $this->sourceFolder, dirname($file1)));
-        touch(sprintf('%s/%s', $this->sourceFolder, $file1));
-        mkdir(sprintf('%s/%s', $this->destinationFolder, dirname($file1)));
+        vfsStream::newDirectory('folder1')->at($this->root->getChild('source'));
+        vfsStream::newDirectory('folder1')->at($this->root->getChild('destination'));
+        vfsStream::newFile('file1.txt')->at($this->root->getChild('source/folder1'));
 
+        $this->installer->install(vfsStream::url('root/source'), vfsStream::url('root/destination'));
 
-        $this->installer->install($this->sourceFolder, $this->destinationFolder);
-        $this->assertFileExists(sprintf('%s/%s', $this->destinationFolder, $file1));
+        $this->assertTrue($this->root->hasChild('destination/folder1/file1.txt'));
     }
 
     public function testExcludedFilesAreNotCopied()
     {
-        $this->installer = new CoreInstaller(array('file1.txt', 'folder1/file2.txt'));
+        $this->installer = new CoreInstaller(array('file1.txt', 'folder1/file2.txt'), $this->gitIgnore);
 
-        $file1 = 'file1.txt';
-        $file2 = 'folder1/file2.txt';
-        $file3 = 'folder1/file3.txt';
+        $source = $this->root->getChild('source');
+        vfsStream::newFile('file1.txt')->at($source);
+        vfsStream::newDirectory('folder1')->at($source);
+        vfsStream::newFile('file2.txt')->at($source->getChild('folder1'));
+        vfsStream::newFile('file3.txt')->at($source->getChild('folder1'));
+        vfsStream::newDirectory('folder2')->at($source->getChild('folder1'));
+        vfsStream::newFile('file4.txt')->at($source->getChild('folder1/folder2'));
 
-        mkdir(sprintf('%s/%s', $this->sourceFolder, dirname($file2)));
-        touch(sprintf('%s/%s', $this->sourceFolder, $file1));
-        touch(sprintf('%s/%s', $this->sourceFolder, $file2));
-        touch(sprintf('%s/%s', $this->sourceFolder, $file3));
+        $this->installer->install(vfsStream::url('root/source'), vfsStream::url('root/destination'));
 
-        $this->installer->install($this->sourceFolder, $this->destinationFolder);
-        $this->assertFileExists(sprintf('%s/%s', $this->destinationFolder, $file3));
-        $this->assertFileNotExists(sprintf('%s/%s', $this->destinationFolder, $file2));
-        $this->assertFileNotExists(sprintf('%s/%s', $this->destinationFolder, $file1));
-
-    }
-
-    public function tearDown()
-    {
-        $fs = new Filesystem();
-        $fs->removeDirectory($this->sourceFolder);
-        $fs->removeDirectory($this->destinationFolder);
+        $this->assertFalse($this->root->hasChild('destination/file1.txt'));
+        $this->assertFalse($this->root->hasChild('destination/folder1/file2.txt'));
+        $this->assertTrue($this->root->hasChild('destination/folder1/file3.txt'));
+        $this->assertTrue($this->root->hasChild('destination/folder1/folder2/file4.txt'));
     }
 }
