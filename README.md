@@ -24,7 +24,7 @@ your `magento-root-dir` folder. If there are custom files in any of these folder
 
 This allows you to install and remove the Magento core in to your project without having to commit it as the `.gitignore`
 is automatically updated. Further to this, in your project root you could ignore the `.gitignore` in the `magento-root-dir`
-This would mean that you can install, update & remove Magento core without any un-tracked files showing in your
+This would mean that you can install, update & remove Magento core without any untracked files showing in your
 repository.
 
 Now updating Magento Core is easy, simply change your require to `"magento/magento": 1.10.0` or whatever the newest version is and run `composer update`!
@@ -97,7 +97,7 @@ Overall your projects `composer.json` should look something like:
                 "url": "git@github.com:AydinHassan/magento-community.git"
             }
         ],
-        "extra" {
+        "extra": {
             "magento-root-dir": "htdocs"
         }
     }
@@ -142,7 +142,7 @@ This one requires a little more explanation. Generating a `.gitignore` for every
 10,000 lines. On investigation this seems to slow git commands like `git status` down quite a bit. Some issues  were taking
 up to 14 seconds for me. 
 
-In order to combat this, any files which are in a default set of folders, will not be added to the `.gitinogre`, instead
+In order to combat this, any files which are in a default set of folders, will not be added to the `.gitignore`, instead
 only the folder will, this greatly reduces the size of the `.gitignore`. The list of folders which are ignored by default can be 
 found here: 
 
@@ -167,7 +167,7 @@ found here:
  * lib/Apache
  * app/code/community/Phoenix/Moneybookers
  
-If you need to commit files inside these directories then you can over-ride this list by setting the `ignore-directories`
+If you need to commit files inside these directories then you can override this list by setting the `ignore-directories`
 key, noted above. Your list will not be merged, it will be used instead. This is in case you want to remove one of the ignore directories.
 
 Creating a core package
@@ -179,7 +179,7 @@ I have provided a script which allows you to easily manage a mirror of Magento. 
 2. Download a version of Magento and extract it: `cd && tar -xzf magento.tar.gz`
 3. Download this script to your home directory: `cd && curl https://gist.githubusercontent.com/AydinHassan/b2934f9c4a4e17385294/raw/8c1697655e532d63166f12f44d71c4e0d6483cc5/add-magento-version.php -o add-magento-version.php`
 4. Run it with the locations of your repository and the extracted Magento code: `php add-magento-version.php ~/magento-mirror ~/magento`
-5. The new version will be commited & tagged. You can now push this up to the remote.
+5. The new version will be committed & tagged. You can now push this up to the remote.
 
 The script will figure out the version and edition of Magento from the source. It will create branches and tags based on those versions. 
 
@@ -199,3 +199,5 @@ Running the Tests
     $ cd magento-core-composer-installer
     $ composer install
     $ ./vendor/bin/phpunit
+
+
