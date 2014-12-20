@@ -173,35 +173,20 @@ class CoreManager implements PluginInterface, EventSubscriberInterface
 
         if ($package->getType() === $this->type) {
             $options = new Options($this->composer->getPackage()->getExtra());
-            $gitIgnore = new GitIgnore(
-                sprintf("%s/.gitignore", $options->getMagentoRootDir()),
-                $options->getIgnoreDirectories(),
-                $options->appendToGitIgnore()
+
+            $this->io->write(
+                sprintf(
+                    '%s<info>Installing: "%s" version: "%s" to: "%s"</info>',
+                    $this->ioPrefix,
+                    $package->getPrettyName(),
+                    $package->getVersion(),
+                    $options->getMagentoRootDir()
+                )
             );
-            $installer = new CoreInstaller($options->getDeployExcludes(), $gitIgnore);
 
-            $this->installCorePackage($package, $installer, $options);
+            $this->getInstaller($options)
+                ->install($this->getInstallPath($package), $options->getMagentoRootDir());
         }
-    }
-
-    /**
-     * @param PackageInterface $corePackage
-     * @param CoreInstaller $installer
-     * @param Options $options
-     */
-    public function installCorePackage(PackageInterface $corePackage, CoreInstaller $installer, Options $options)
-    {
-        $this->io->write(
-            sprintf(
-                '%s<info>Installing: "%s" version: "%s" to: "%s"</info>',
-                $this->ioPrefix,
-                $corePackage->getPrettyName(),
-                $corePackage->getVersion(),
-                $options->getMagentoRootDir()
-            )
-        );
-
-        $installer->install($this->getInstallPath($corePackage), $options->getMagentoRootDir());
     }
 
     /**
@@ -219,39 +204,35 @@ class CoreManager implements PluginInterface, EventSubscriberInterface
         }
 
         if ($package->getType() === $this->type) {
+
             $options = new Options($this->composer->getPackage()->getExtra());
-            $gitIgnore = new GitIgnore(
-                sprintf("%s/.gitignore", $options->getMagentoRootDir()),
-                $options->getIgnoreDirectories(),
-                $options->appendToGitIgnore()
+
+            $this->io->write(
+                sprintf(
+                    '%s<info>Removing: "%s" version: "%s" from: "%s"</info>',
+                    $this->ioPrefix,
+                    $package->getPrettyName(),
+                    $package->getVersion(),
+                    $options->getMagentoRootDir()
+                )
             );
-            $unInstaller = new CoreUnInstaller($options->getDeployExcludes(), $gitIgnore, $this->filesystem);
-            $this->removeCorePackage($package, $unInstaller, $options);
+
+            $this->getInstaller($options)
+                ->unInstall($this->getInstallPath($package), $options->getMagentoRootDir());
         }
     }
 
-    /**
-     * @param PackageInterface $corePackage
-     * @param CoreUnInstaller $unInstaller
-     * @param Options $options
-     */
-    public function removeCorePackage(
-        PackageInterface $corePackage,
-        CoreUnInstaller $unInstaller,
-        Options $options
-    ) {
-        $source = $this->getInstallPath($corePackage);
+    public function getInstaller(Options $options)
+    {
+        $exclude = new Exclude($options->getDeployExcludes());
 
-        $this->io->write(
-            sprintf(
-                '%s<info>Removing: "%s" version: "%s" from: "%s"</info>',
-                $this->ioPrefix,
-                $corePackage->getPrettyName(),
-                $corePackage->getVersion(),
-                $options->getMagentoRootDir()
-            )
+        $gitIgnore = new GitIgnore(
+            sprintf("%s/.gitignore", $options->getMagentoRootDir()),
+            $options->getIgnoreDirectories(),
+            $options->appendToGitIgnore()
         );
 
-        $unInstaller->unInstall($source, $options->getMagentoRootDir());
+        $installer = new CoreInstaller($exclude, $gitIgnore, $this->filesystem);
+        return $installer;
     }
 }

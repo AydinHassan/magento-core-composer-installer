@@ -57,57 +57,6 @@ class CoreManagerTest extends \PHPUnit_Framework_TestCase
         $this->plugin->activate($this->composer, $this->io);
     }
 
-    public function testRemoveCorePackage()
-    {
-        $corePackage = $this->createCorePackage();
-
-        $unInstaller = $this->getMockBuilder('AydinHassan\MagentoCoreComposerInstaller\CoreUnInstaller')
-            ->disableOriginalConstructor()
-            ->setMethods(array('unInstall'))
-            ->getMock();
-
-        $options = new Options(array('magento-root-dir' => 'some/dir'));
-
-        $unInstaller->expects($this->once())
-            ->method('unInstall')
-            ->with(sprintf('%s/vendor/magento/core-package', $this->tmpDir), 'some/dir');
-
-        $l  = '  - <comment>MagentoCoreInstaller: </comment>';
-        $l .= '<info>Removing: "magento/core-package" version: "1.0.0" from: "some/dir"</info>';
-
-        $this->io->expects($this->once())
-            ->method('write')
-            ->with($l);
-
-        $this->plugin->removeCorePackage($corePackage, $unInstaller, $options);
-    }
-
-    public function testInstallPackage()
-    {
-        $corePackage = $this->createCorePackage();
-
-        $installer = $this->getMockBuilder('AydinHassan\MagentoCoreComposerInstaller\CoreInstaller')
-            ->disableOriginalConstructor()
-            ->setMethods(array('install'))
-            ->getMock();
-
-        $options = new Options(array('magento-root-dir' => 'some/dir'));
-
-        $installer->expects($this->once())
-            ->method('install')
-            ->with(sprintf('%s/vendor/magento/core-package', $this->tmpDir), 'some/dir');
-
-
-        $l  = '  - <comment>MagentoCoreInstaller: </comment>';
-        $l .= '<info>Installing: "magento/core-package" version: "1.0.0" to: "some/dir"</info>';
-
-        $this->io->expects($this->once())
-            ->method('write')
-            ->with($l);
-
-        $this->plugin->installCorePackage($corePackage, $installer, $options);
-    }
-
     public function testGetSubscribedEvents()
     {
         $events = CoreManager::getSubscribedEvents();
@@ -262,12 +211,14 @@ class CoreManagerTest extends \PHPUnit_Framework_TestCase
             new InstallOperation($corePackage)
         );
 
-        $plugin = $this->getMockBuilder('AydinHassan\MagentoCoreComposerInstaller\CoreManager')
-            ->setMethods(array('installCorePackage'))
-            ->getMock();
+        $plugin = $this->getPluginWithMockedInstaller('install');
 
-        $plugin->expects($this->once())
-            ->method('installCorePackage');
+        $l  = '  - <comment>MagentoCoreInstaller: </comment>';
+        $l .= '<info>Installing: "magento/core-package" version: "1.0.0" to: "htdocs"</info>';
+
+        $this->io->expects($this->once())
+            ->method('write')
+            ->with($l);
 
         $plugin->activate($this->composer, $this->io);
         $plugin->installCore($event);
@@ -289,12 +240,14 @@ class CoreManagerTest extends \PHPUnit_Framework_TestCase
             new UpdateOperation($this->createCorePackage('magento/initial'), $corePackage)
         );
 
-        $plugin = $this->getMockBuilder('AydinHassan\MagentoCoreComposerInstaller\CoreManager')
-            ->setMethods(array('installCorePackage'))
-            ->getMock();
+        $plugin = $this->getPluginWithMockedInstaller('install');
 
-        $plugin->expects($this->once())
-            ->method('installCorePackage');
+        $l  = '  - <comment>MagentoCoreInstaller: </comment>';
+        $l .= '<info>Installing: "magento/core-package" version: "1.0.0" to: "htdocs"</info>';
+
+        $this->io->expects($this->once())
+            ->method('write')
+            ->with($l);
 
         $plugin->activate($this->composer, $this->io);
         $plugin->installCore($event);
@@ -316,12 +269,14 @@ class CoreManagerTest extends \PHPUnit_Framework_TestCase
             new UninstallOperation($corePackage)
         );
 
-        $plugin = $this->getMockBuilder('AydinHassan\MagentoCoreComposerInstaller\CoreManager')
-            ->setMethods(array('removeCorePackage'))
-            ->getMock();
+        $plugin = $this->getPluginWithMockedInstaller('unInstall');
 
-        $plugin->expects($this->once())
-            ->method('removeCorePackage');
+        $l  = '  - <comment>MagentoCoreInstaller: </comment>';
+        $l .= '<info>Removing: "magento/core-package" version: "1.0.0" from: "htdocs"</info>';
+
+        $this->io->expects($this->once())
+            ->method('write')
+            ->with($l);
 
         $plugin->activate($this->composer, $this->io);
         $plugin->uninstallCore($event);
@@ -343,12 +298,14 @@ class CoreManagerTest extends \PHPUnit_Framework_TestCase
             new UpdateOperation($corePackage, $this->createCorePackage('magento/target'))
         );
 
-        $plugin = $this->getMockBuilder('AydinHassan\MagentoCoreComposerInstaller\CoreManager')
-            ->setMethods(array('removeCorePackage'))
-            ->getMock();
+        $plugin = $this->getPluginWithMockedInstaller('unInstall');
 
-        $plugin->expects($this->once())
-            ->method('removeCorePackage');
+        $l  = '  - <comment>MagentoCoreInstaller: </comment>';
+        $l .= '<info>Removing: "magento/core-package" version: "1.0.0" from: "htdocs"</info>';
+
+        $this->io->expects($this->once())
+            ->method('write')
+            ->with($l);
 
         $plugin->activate($this->composer, $this->io);
         $plugin->uninstallCore($event);
@@ -383,5 +340,37 @@ class CoreManagerTest extends \PHPUnit_Framework_TestCase
         $package = new Package($name, "1.0.0", $name);
         $package->setType('magento-core');
         return $package;
+    }
+
+    /**
+     * @return \PHPUnit_Framework_MockObject_MockObject
+     */
+    private function getPluginWithMockedInstaller($installerMethod)
+    {
+        $installer = $this->getMockBuilder('AydinHassan\MagentoCoreComposerInstaller\CoreInstaller')
+            ->disableOriginalConstructor()
+            ->getMock();
+
+        $installer->expects($this->once())
+            ->method($installerMethod);
+
+        $plugin = $this->getMockBuilder('AydinHassan\MagentoCoreComposerInstaller\CoreManager')
+            ->setMethods(array('getInstaller'))
+            ->getMock();
+
+        $plugin->expects($this->once())
+            ->method('getInstaller')
+            ->with($this->isInstanceOf('AydinHassan\MagentoCoreComposerInstaller\Options'))
+            ->will($this->returnValue($installer));
+
+        return $plugin;
+    }
+
+    public function testGetInstaller()
+    {
+        $this->assertInstanceOf(
+            'AydinHassan\MagentoCoreComposerInstaller\CoreInstaller',
+            $this->plugin->getInstaller($this->getOptions())
+        );
     }
 }
