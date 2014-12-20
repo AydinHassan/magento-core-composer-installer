@@ -67,5 +67,4 @@ class ExcludeTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($exclude->exclude('folder1/file2.txt'));
         $this->assertTrue($exclude->exclude('folder1/folder2/file3.txt'));
     }
-
 }
