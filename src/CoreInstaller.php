@@ -2,6 +2,7 @@
 
 namespace AydinHassan\MagentoCoreComposerInstaller;
 
+use Composer\Util\Filesystem;
 use RecursiveIteratorIterator;
 use RecursiveDirectoryIterator;
 
@@ -14,9 +15,9 @@ class CoreInstaller
 {
 
     /**
-     * @var array
+     * @var Exclude
      */
-    protected $excludes = array();
+    protected $exclude;
 
     /**
      * @var GitIgnore
@@ -24,13 +25,20 @@ class CoreInstaller
     protected $gitIgnore;
 
     /**
-     * @param array $excludes
-     * @param GitIgnore $gitIgnore
+     * @var Filesystem
      */
-    public function __construct(array $excludes, GitIgnore $gitIgnore)
+    protected $fileSystem;
+
+    /**
+     * @param Exclude $exclude
+     * @param GitIgnore $gitIgnore
+     * @param Filesystem $fileSystem
+     */
+    public function __construct(Exclude $exclude, GitIgnore $gitIgnore, Filesystem $fileSystem)
     {
-        $this->excludes     = $excludes;
+        $this->exclude      = $exclude;
         $this->gitIgnore    = $gitIgnore;
+        $this->fileSystem   = $fileSystem;
     }
 
     /**
@@ -39,14 +47,7 @@ class CoreInstaller
      */
     public function install($source, $destination)
     {
-        $iterator = new RecursiveIteratorIterator(
-            new RecursiveDirectoryIterator(
-                $source,
-                RecursiveDirectoryIterator::SKIP_DOTS
-            ),
-            RecursiveIteratorIterator::SELF_FIRST
-        );
-
+        $iterator = $this->getIterator($source, RecursiveIteratorIterator::SELF_FIRST);
         foreach ($iterator as $item) {
 
             $destinationFile = sprintf("%s/%s", $destination, $iterator->getSubPathName());
@@ -59,7 +60,7 @@ class CoreInstaller
                 continue;
             }
 
-            if ($this->exclude($filePath)) {
+            if ($this->exclude->exclude($filePath)) {
                 continue;
             }
 
@@ -69,19 +70,54 @@ class CoreInstaller
     }
 
     /**
-     * Should we exclude this file from the deploy?
-     *
-     * @param string $filePath
-     * @return bool
+     * @param string $source
+     * @param string $destination
      */
-    public function exclude($filePath)
+    public function unInstall($source, $destination)
     {
-        foreach ($this->excludes as $exclude) {
-            if (substr($filePath, 0, strlen($exclude)) === $exclude) {
-                return true;
+
+        $iterator = $this->getIterator($source, RecursiveIteratorIterator::CHILD_FIRST);
+        foreach ($iterator as $item) {
+            $destinationFile = sprintf("%s/%s", $destination, $iterator->getSubPathName());
+
+            if ($this->exclude->exclude($iterator->getSubPathName())) {
+                continue;
             }
+
+            if (!file_exists($destinationFile)) {
+                $this->gitIgnore->removeEntry($iterator->getSubPathName());
+                continue;
+            }
+
+            if ($item->isDir()) {
+                //check if there are not other files in this dir
+                if ($this->fileSystem->isDirEmpty($destinationFile)) {
+                    $this->fileSystem->removeDirectory($destinationFile);
+
+                }
+                continue;
+            }
+
+            $this->fileSystem->unlink($destinationFile);
+            $this->gitIgnore->removeEntry($iterator->getSubPathName());
         }
 
-        return false;
+        $this->gitIgnore->removeIgnoreDirectories();
+    }
+
+    /**
+     * @param string $source
+     * @param int $flags
+     * @return RecursiveIteratorIterator
+     */
+    public function getIterator($source, $flags)
+    {
+        return new RecursiveIteratorIterator(
+            new RecursiveDirectoryIterator(
+                $source,
+                RecursiveDirectoryIterator::SKIP_DOTS
+            ),
+            $flags
+        );
     }
 }
