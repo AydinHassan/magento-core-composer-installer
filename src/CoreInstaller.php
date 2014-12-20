@@ -53,14 +53,14 @@ class CoreInstaller
             $destinationFile = sprintf("%s/%s", $destination, $iterator->getSubPathName());
             $filePath        = $iterator->getSubPathName();
 
+            if ($this->exclude->exclude($filePath)) {
+                continue;
+            }
+
             if ($item->isDir()) {
                 if (!file_exists($destinationFile)) {
                     mkdir($destinationFile);
                 }
-                continue;
-            }
-
-            if ($this->exclude->exclude($filePath)) {
                 continue;
             }
 

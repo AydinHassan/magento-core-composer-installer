@@ -54,4 +54,18 @@ class ExcludeTest extends \PHPUnit_Framework_TestCase
             array('file3.txt', false),
         );
     }
+
+
+    public function testSubDirectoriesOfExcludeAreAlsoExcluded()
+    {
+        $excludes = array(
+            'folder1',
+        );
+        $exclude = new Exclude($excludes);
+
+        $this->assertTrue($exclude->exclude('folder1/file1.txt'));
+        $this->assertTrue($exclude->exclude('folder1/file2.txt'));
+        $this->assertTrue($exclude->exclude('folder1/folder2/file3.txt'));
+    }
+
 }
