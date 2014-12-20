@@ -14,14 +14,14 @@ class CoreInstaller
 {
 
     /**
-     * @var GitIgnore
-     */
-    protected $gitIgnore;
-
-    /**
      * @var array
      */
     protected $excludes = array();
+
+    /**
+     * @var GitIgnore
+     */
+    protected $gitIgnore;
 
     /**
      * @param array $excludes
@@ -29,8 +29,8 @@ class CoreInstaller
      */
     public function __construct(array $excludes, GitIgnore $gitIgnore)
     {
-        $this->gitIgnore    = $gitIgnore;
         $this->excludes     = $excludes;
+        $this->gitIgnore    = $gitIgnore;
     }
 
     /**

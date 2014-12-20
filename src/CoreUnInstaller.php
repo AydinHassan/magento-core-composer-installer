@@ -16,6 +16,11 @@ class CoreUnInstaller
 {
 
     /**
+     * @var array
+     */
+    protected $excludes = array();
+
+    /**
      * @var GitIgnore
      */
     protected $gitIgnore;
@@ -26,13 +31,15 @@ class CoreUnInstaller
     protected $fileSystem;
 
     /**
-     * @param Filesystem $fileSystem
+     * @param array $excludes
      * @param GitIgnore $gitIgnore
+     * @param Filesystem $fileSystem
      */
-    public function __construct(Filesystem $fileSystem, GitIgnore $gitIgnore)
+    public function __construct(array $excludes, GitIgnore $gitIgnore, Filesystem $fileSystem)
     {
-        $this->fileSystem   = $fileSystem;
+        $this->excludes     = $excludes;
         $this->gitIgnore    = $gitIgnore;
+        $this->fileSystem   = $fileSystem;
     }
 
     /**
@@ -51,6 +58,10 @@ class CoreUnInstaller
 
         foreach ($iterator as $item) {
             $destinationFile = sprintf("%s/%s", $destination, $iterator->getSubPathName());
+
+            if ($this->exclude($iterator->getSubPathName())) {
+                continue;
+            }
 
             if (!file_exists($destinationFile)) {
                 $this->gitIgnore->removeEntry($iterator->getSubPathName());
@@ -71,5 +82,22 @@ class CoreUnInstaller
         }
 
         $this->gitIgnore->removeIgnoreDirectories();
+    }
+
+    /**
+     * Should we exclude this file from the deploy?
+     *
+     * @param string $filePath
+     * @return bool
+     */
+    public function exclude($filePath)
+    {
+        foreach ($this->excludes as $exclude) {
+            if (substr($filePath, 0, strlen($exclude)) === $exclude) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }
