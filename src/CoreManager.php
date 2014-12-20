@@ -225,7 +225,7 @@ class CoreManager implements PluginInterface, EventSubscriberInterface
                 $options->getIgnoreDirectories(),
                 $options->appendToGitIgnore()
             );
-            $unInstaller = new CoreUnInstaller($this->filesystem, $gitIgnore);
+            $unInstaller = new CoreUnInstaller($options->getDeployExcludes(), $gitIgnore, $this->filesystem);
             $this->removeCorePackage($package, $unInstaller, $options);
         }
     }

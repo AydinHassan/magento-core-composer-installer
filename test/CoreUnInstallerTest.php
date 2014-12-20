@@ -24,7 +24,7 @@ class CoreUnInstallerTest extends \PHPUnit_Framework_TestCase
             ->setMethods(array('removeEntry', 'removeIgnoreDirectories', '__destruct'))
             ->getMock();
 
-        $this->unInstaller = new CoreUnInstaller(new Filesystem, $this->gitIgnore);
+        $this->unInstaller = new CoreUnInstaller(array(), $this->gitIgnore, new Filesystem);
         $this->root        = vfsStream::setup('root', null, array('source' => array(), 'destination' => array()));
     }
 
@@ -99,5 +99,22 @@ class CoreUnInstallerTest extends \PHPUnit_Framework_TestCase
         $this->assertFalse($this->root->hasChild('destination/file1.txt'));
         $this->assertFalse($this->root->hasChild('destination/file2.txt'));
         $this->assertFalse($this->root->hasChild('destination/folder1/file3.txt'));
+    }
+
+    public function testExcludedFilesAreNotRemovedFromDestination()
+    {
+        $this->createDirStructure();
+
+        $this->unInstaller = new CoreUnInstaller(
+            array('file1.txt', 'folder1/file3.txt'),
+            $this->gitIgnore,
+            new Filesystem
+        );
+
+        $this->unInstaller->unInstall(vfsStream::url('root/source'), vfsStream::url('root/destination'));
+
+        $this->assertTrue($this->root->hasChild('destination/file1.txt'));
+        $this->assertFalse($this->root->hasChild('destination/file2.txt'));
+        $this->assertTrue($this->root->hasChild('destination/folder1/file3.txt'));
     }
 }
