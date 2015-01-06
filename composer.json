@@ -1,6 +1,8 @@
 {
     "name": "aydin-hassan/magento-core-composer-installer",
+    "description": "A composer plugin for managing Magento Core",
     "type": "composer-plugin",
+    "license": "MIT",
     "require": {
         "composer-plugin-api": "~1.0"
     },
