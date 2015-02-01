@@ -44,22 +44,22 @@ class CoreInstallerTest extends \PHPUnit_Framework_TestCase
         $this->gitIgnore
             ->expects($this->at(0))
             ->method('addEntry')
-            ->with('file1.txt');
+            ->with('/file1.txt');
 
         $this->gitIgnore
             ->expects($this->at(1))
             ->method('addEntry')
-            ->with('folder1/file2.txt');
+            ->with('/folder1/file2.txt');
 
         $this->gitIgnore
             ->expects($this->at(2))
             ->method('addEntry')
-            ->with('folder1/file3.txt');
+            ->with('/folder1/file3.txt');
 
         $this->gitIgnore
             ->expects($this->at(3))
             ->method('addEntry')
-            ->with('folder1/folder2/file4.txt');
+            ->with('/folder1/folder2/file4.txt');
 
         $this->installer->install(vfsStream::url('root/source'), vfsStream::url('root/destination'));
 
@@ -124,15 +124,15 @@ class CoreInstallerTest extends \PHPUnit_Framework_TestCase
         $this->gitIgnore
             ->expects($this->at(0))
             ->method('removeEntry')
-            ->with('file1.txt');
+            ->with('/file1.txt');
         $this->gitIgnore
             ->expects($this->at(1))
             ->method('removeEntry')
-            ->with('file2.txt');
+            ->with('/file2.txt');
         $this->gitIgnore
             ->expects($this->at(2))
             ->method('removeEntry')
-            ->with('folder1/file3.txt');
+            ->with('/folder1/file3.txt');
         $this->gitIgnore
             ->expects($this->once())
             ->method('removeIgnoreDirectories');

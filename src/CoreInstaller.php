@@ -65,7 +65,7 @@ class CoreInstaller
             }
 
             copy($item, $destinationFile);
-            $this->gitIgnore->addEntry($iterator->getSubPathName());
+            $this->gitIgnore->addEntry('/' . $iterator->getSubPathName());
         }
     }
 
@@ -99,7 +99,7 @@ class CoreInstaller
             }
 
             $this->fileSystem->unlink($destinationFile);
-            $this->gitIgnore->removeEntry($iterator->getSubPathName());
+            $this->gitIgnore->removeEntry('/' . $iterator->getSubPathName());
         }
 
         $this->gitIgnore->removeIgnoreDirectories();
