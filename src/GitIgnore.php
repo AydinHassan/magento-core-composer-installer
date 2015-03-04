@@ -20,6 +20,8 @@ class GitIgnore
      */
     protected $directoriesToIgnoreEntirely = array();
 
+    protected $filesToIgnoreEntirely = array();
+
     /**
      * @var string|null
      */
@@ -35,8 +37,12 @@ class GitIgnore
      * @param array $directoriesToIgnoreEntirely
      * @param bool $gitIgnoreAppend
      */
-    public function __construct($fileLocation, array $directoriesToIgnoreEntirely, $gitIgnoreAppend = true)
-    {
+    public function __construct(
+        $fileLocation,
+        array $directoriesToIgnoreEntirely,
+        array $filesToIgnoreEntirely,
+        $gitIgnoreAppend = true
+    ) {
         $this->gitIgnoreLocation = $fileLocation;
 
         if (file_exists($fileLocation) && $gitIgnoreAppend) {
@@ -44,9 +50,14 @@ class GitIgnore
         }
 
         $this->directoriesToIgnoreEntirely = $directoriesToIgnoreEntirely;
+        $this->filesToIgnoreEntirely = $filesToIgnoreEntirely;
 
         foreach ($this->directoriesToIgnoreEntirely as $directory) {
             $this->lines[$directory] = $directory;
+        }
+
+        foreach ($this->filesToIgnoreEntirely as $file) {
+            $this->lines[$file] = $file;
         }
     }
 

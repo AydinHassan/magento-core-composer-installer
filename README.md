@@ -144,29 +144,8 @@ up to 14 seconds for me.
 
 In order to combat this, any files which are in a default set of folders, will not be added to the `.gitignore`, instead
 only the folder will, this greatly reduces the size of the `.gitignore`. The list of folders which are ignored by default can be 
-found here: 
+found [here](https://github.com/AydinHassan/magento-core-composer-installer/blob/master/src/Options.php#L24) 
 
- * app/code/core/Mage
- * app/code/core/Zend
- * app/code/core/Enterprise
- * lib/Zend
- * lib/Varien
- * lib/Magento
- * lib/PEAR
- * lib/Mage
- * lib/phpseclib
- * lib/flex
- * lib/LinLibertineFont
- * downloader
- * js/extjs
- * js/prototype
- * js/calendar
- * js/mage
- * js/varien
- * js/tiny_mce
- * lib/Apache
- * app/code/community/Phoenix/Moneybookers
- 
 If you need to commit files inside these directories then you can override this list by setting the `ignore-directories`
 key, noted above. Your list will not be merged, it will be used instead. This is in case you want to remove one of the ignore directories.
 
