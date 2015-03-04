@@ -22,7 +22,7 @@ class GitIgnoreTest extends \PHPUnit_Framework_TestCase
 
     public function testIfFileNotExistsItIsCreated()
     {
-        $gitIgnore = new GitIgnore($this->gitIgnoreFile, array());
+        $gitIgnore = new GitIgnore($this->gitIgnoreFile, array(), array(), array());
         $gitIgnore->addEntry("file1");
         unset($gitIgnore);
 
@@ -34,7 +34,7 @@ class GitIgnoreTest extends \PHPUnit_Framework_TestCase
         $lines = array('line1', 'line2');
         file_put_contents($this->gitIgnoreFile, implode("\n", $lines));
 
-        $gitIgnore = new GitIgnore($this->gitIgnoreFile, array(), true);
+        $gitIgnore = new GitIgnore($this->gitIgnoreFile, array(), array(), true);
 
         $this->assertFileExists($this->gitIgnoreFile);
         $this->assertSame($lines, $gitIgnore->getEntries());
@@ -45,7 +45,7 @@ class GitIgnoreTest extends \PHPUnit_Framework_TestCase
         $lines = array('line1', 'line2');
         file_put_contents($this->gitIgnoreFile, implode("\n", $lines));
 
-        $gitIgnore = new GitIgnore($this->gitIgnoreFile, array(), true);
+        $gitIgnore = new GitIgnore($this->gitIgnoreFile, array(), array(), true);
         $gitIgnore->wipeOut();
 
         $this->assertFileExists($this->gitIgnoreFile);
@@ -57,16 +57,26 @@ class GitIgnoreTest extends \PHPUnit_Framework_TestCase
     public function testIgnoreDirectoriesAreAddedToGitIgnore()
     {
         $folders = array('folder1', 'folder2');
-        $gitIgnore = new GitIgnore($this->gitIgnoreFile, $folders, true);
+        $gitIgnore = new GitIgnore($this->gitIgnoreFile, $folders, array(), true);
         $gitIgnore->addEntry('folder1/file1.txt');
         $this->assertSame($folders, $gitIgnore->getEntries());
         unset($gitIgnore);
         $this->assertEquals("folder1\nfolder2", file_get_contents($this->gitIgnoreFile));
     }
 
+    public function testIgnoreFilesAreAddedToGitIgnore()
+    {
+        $folders = array('file1.txt', 'file2.txt');
+        $gitIgnore = new GitIgnore($this->gitIgnoreFile, $folders, array(), true);
+        $gitIgnore->addEntry('file1.txt');
+        $this->assertSame($folders, $gitIgnore->getEntries());
+        unset($gitIgnore);
+        $this->assertEquals("file1.txt\nfile2.txt", file_get_contents($this->gitIgnoreFile));
+    }
+
     public function testAddEntryDoesNotAddDuplicates()
     {
-        $gitIgnore = new GitIgnore($this->gitIgnoreFile, array(), true);
+        $gitIgnore = new GitIgnore($this->gitIgnoreFile, array(), array(), true);
         $gitIgnore->addEntry("file1.txt");
         $gitIgnore->addEntry("file1.txt");
         $this->assertCount(1, $gitIgnore->getEntries());
@@ -75,7 +85,7 @@ class GitIgnoreTest extends \PHPUnit_Framework_TestCase
     public function testAddEntryDoesNotAddFileOrDirectoryIfItIsInsideAnIgnoredDirectory()
     {
         $ignoreDirs = array("dir1", "dir2/lol/");
-        $gitIgnore = new GitIgnore($this->gitIgnoreFile, $ignoreDirs);
+        $gitIgnore = new GitIgnore($this->gitIgnoreFile, $ignoreDirs, array());
         $gitIgnore->addEntry("dir1/file1.txt");
         $gitIgnore->addEntry("dir2/lol/file2.txt");
         $gitIgnore->addEntry("dir2/file3.txt");
@@ -92,7 +102,7 @@ class GitIgnoreTest extends \PHPUnit_Framework_TestCase
     public function testIgnoreDirectoriesAreNotWrittenIfNoEntriesAreAdded()
     {
         $folders = array('folder1', 'folder2');
-        $gitIgnore = new GitIgnore($this->gitIgnoreFile, $folders, true);
+        $gitIgnore = new GitIgnore($this->gitIgnoreFile, $folders, array(), true);
         $this->assertSame($folders, $gitIgnore->getEntries());
         unset($gitIgnore);
         $this->assertFileNotExists($this->gitIgnoreFile);
@@ -105,7 +115,7 @@ class GitIgnoreTest extends \PHPUnit_Framework_TestCase
         $writeTime = filemtime($this->gitIgnoreFile);
 
         $folders = array('folder1', 'folder2');
-        $gitIgnore = new GitIgnore($this->gitIgnoreFile, $folders, true);
+        $gitIgnore = new GitIgnore($this->gitIgnoreFile, $folders, array(), true);
         unset($gitIgnore);
 
         clearstatcache();
@@ -117,7 +127,7 @@ class GitIgnoreTest extends \PHPUnit_Framework_TestCase
         $lines = array('line1', 'line2');
         file_put_contents($this->gitIgnoreFile, implode("\n", $lines));
 
-        $gitIgnore = new GitIgnore($this->gitIgnoreFile, array(), true);
+        $gitIgnore = new GitIgnore($this->gitIgnoreFile, array(), array(), true);
         $gitIgnore->removeEntry('line1');
 
         $this->assertEquals(array('line2'), $gitIgnore->getEntries());
@@ -125,7 +135,7 @@ class GitIgnoreTest extends \PHPUnit_Framework_TestCase
 
     public function testRemoveIgnoreDirectoriesSuccessfullyRemovesEntries()
     {
-        $gitIgnore = new GitIgnore($this->gitIgnoreFile, array('line1', 'line2'));
+        $gitIgnore = new GitIgnore($this->gitIgnoreFile, array('line1', 'line2'), array());
         $this->assertEquals(array('line1', 'line2'), $gitIgnore->getEntries());
         $gitIgnore->removeIgnoreDirectories();
         $this->assertEquals(array(), $gitIgnore->getEntries());
