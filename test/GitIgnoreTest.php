@@ -119,11 +119,20 @@ STRING;
 
     public function testIgnoreDirectoriesAreNotWrittenIfNoEntriesAreAdded()
     {
-        $folders = array('folder1', 'folder2');
+        $folders = array();
         $gitIgnore = new GitIgnore($this->gitIgnoreFile, $folders, true);
         $this->assertSame($folders, $gitIgnore->getEntries());
         unset($gitIgnore);
         $this->assertFileNotExists($this->gitIgnoreFile);
+    }
+
+    public function testIgnoreDirectoriesAreWrittenIfDirectoriesToIgnoreEntirelyDifferFromTheIgnoreFile()
+    {
+        $folders = array('folder1', 'folder2');
+        $gitIgnore = new GitIgnore($this->gitIgnoreFile, $folders, true);
+        $this->assertSame($folders, $gitIgnore->getEntries());
+        unset($gitIgnore);
+        $this->assertFileExists($this->gitIgnoreFile);
     }
 
     public function testGitIgnoreIsNotWrittenIfNoAdditions()

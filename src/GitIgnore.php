@@ -45,11 +45,7 @@ class GitIgnore
 
         $this->directoriesToIgnoreEntirely = $directoriesToIgnoreEntirely;
 
-        foreach ($this->directoriesToIgnoreEntirely as $directory) {
-            if (!in_array($directory, $this->lines)) {
-                $this->lines[] = $directory;
-            }
-        }
+        $this->addEntriesForDirectoriesToIgnoreEntirely();
     }
 
     /**
@@ -118,6 +114,19 @@ class GitIgnore
     {
         if ($this->hasChanges) {
             file_put_contents($this->gitIgnoreLocation, implode("\n", $this->lines));
+        }
+    }
+
+    /**
+     * Add entires to for all directories ignored entirely.
+     */
+    protected function addEntriesForDirectoriesToIgnoreEntirely()
+    {
+        foreach ($this->directoriesToIgnoreEntirely as $directory) {
+            if (!in_array($directory, $this->lines)) {
+                $this->lines[] = $directory;
+                $this->hasChanges = true;
+            }
         }
     }
 }
