@@ -118,7 +118,7 @@ class GitIgnore
     }
 
     /**
-     * Add entires to for all directories ignored entirely.
+     * Add entries to for all directories ignored entirely.
      */
     protected function addEntriesForDirectoriesToIgnoreEntirely()
     {
