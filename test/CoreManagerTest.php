@@ -38,7 +38,7 @@ class CoreManagerTest extends \PHPUnit_Framework_TestCase
         $this->composer = new Composer();
         $this->composer->setConfig($this->config);
 
-        $this->tmpDir = sprintf("%s/magento-core-composer-installer", sys_get_temp_dir());
+        $this->tmpDir = sprintf("%s/magento-core-composer-installer", realpath(sys_get_temp_dir()));
 
 
         $this->config->merge(array(
@@ -325,7 +325,7 @@ class CoreManagerTest extends \PHPUnit_Framework_TestCase
     public function getOptions()
     {
         return new Options(array(
-            'magento-root-dir' => '/'
+            'magento-root-dir' => $this->tmpDir,
         ));
     }
 

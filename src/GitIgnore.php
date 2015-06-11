@@ -40,14 +40,12 @@ class GitIgnore
         $this->gitIgnoreLocation = $fileLocation;
 
         if (file_exists($fileLocation) && $gitIgnoreAppend) {
-            $this->lines = array_flip(file($fileLocation, FILE_IGNORE_NEW_LINES));
+            $this->lines = explode("\n", file_get_contents($fileLocation));
         }
 
         $this->directoriesToIgnoreEntirely = $directoriesToIgnoreEntirely;
 
-        foreach ($this->directoriesToIgnoreEntirely as $directory) {
-            $this->lines[$directory] = $directory;
-        }
+        $this->addEntriesForDirectoriesToIgnoreEntirely();
     }
 
     /**
@@ -62,8 +60,8 @@ class GitIgnore
             }
         }
 
-        if ($addToGitIgnore && !isset($this->lines[$file])) {
-            $this->lines[$file] = $file;
+        if ($addToGitIgnore && !in_array($file, $this->lines)) {
+            $this->lines[] = $file;
         }
 
         $this->hasChanges = true;
@@ -74,8 +72,10 @@ class GitIgnore
      */
     public function removeEntry($file)
     {
-        if (isset($this->lines[$file])) {
-            unset($this->lines[$file]);
+        $index = array_search($file, $this->lines);
+
+        if ($index !== false) {
+            unset($this->lines[$index]);
             $this->hasChanges = true;
         }
     }
@@ -95,7 +95,7 @@ class GitIgnore
      */
     public function getEntries()
     {
-        return array_values(array_flip($this->lines));
+        return array_values($this->lines);
     }
 
     /**
@@ -113,7 +113,20 @@ class GitIgnore
     public function __destruct()
     {
         if ($this->hasChanges) {
-            file_put_contents($this->gitIgnoreLocation, implode("\n", array_flip($this->lines)));
+            file_put_contents($this->gitIgnoreLocation, implode("\n", $this->lines));
+        }
+    }
+
+    /**
+     * Add entries to for all directories ignored entirely.
+     */
+    protected function addEntriesForDirectoriesToIgnoreEntirely()
+    {
+        foreach ($this->directoriesToIgnoreEntirely as $directory) {
+            if (!in_array($directory, $this->lines)) {
+                $this->lines[] = $directory;
+                $this->hasChanges = true;
+            }
         }
     }
 }
