@@ -104,12 +104,7 @@ class Options
         '/skin/adminhtml/default/default/xmlconnect',
         '/skin/frontend/base/default/images/cookies',
         '/skin/frontend/base/default/images/xmlconnect',
-        '/app/design/frontend/default/modern/template/catalogsearch',
-        '/var/session'
-    );
-
-    protected $ignoreFiles = array(
-        '/app/etc/local.xml'
+        '/app/design/frontend/default/modern/template/catalogsearch'
     );
 
     /**
@@ -180,11 +175,6 @@ class Options
     public function getIgnoreDirectories()
     {
         return $this->ignoreDirectories;
-    }
-
-    public function getIgnoreFiles()
-    {
-        return $this->ignoreFiles;
     }
 
     /**

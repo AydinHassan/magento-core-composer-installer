@@ -325,7 +325,7 @@ class CoreManagerTest extends \PHPUnit_Framework_TestCase
     public function getOptions()
     {
         return new Options(array(
-            'magento-root-dir' => '/'
+            'magento-root-dir' => $this->tmpDir,
         ));
     }
 
