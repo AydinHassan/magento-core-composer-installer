@@ -16,6 +16,7 @@ use Composer\Repository\CompositeRepository;
 use Composer\Repository\RepositoryManager;
 use Composer\Repository\WritableArrayRepository;
 use Composer\Script\PackageEvent;
+use Composer\Util\Filesystem;
 
 /**
  * Class CoreManagerTest
@@ -91,6 +92,7 @@ class CoreManagerTest extends \PHPUnit_Framework_TestCase
             'solver-event',
             $this->composer,
             $this->io,
+            false,
             $this->getMock('Composer\DependencyResolver\PolicyInterface'),
             $pool,
             $compositeRepo,
@@ -121,6 +123,7 @@ class CoreManagerTest extends \PHPUnit_Framework_TestCase
             'solver-event',
             $this->composer,
             $this->io,
+            false,
             $this->getMock('Composer\DependencyResolver\PolicyInterface'),
             $pool,
             $compositeRepo,
@@ -152,6 +155,7 @@ class CoreManagerTest extends \PHPUnit_Framework_TestCase
             'solver-event',
             $this->composer,
             $this->io,
+            false,
             $this->getMock('Composer\DependencyResolver\PolicyInterface'),
             $pool,
             $compositeRepo,
@@ -185,6 +189,7 @@ class CoreManagerTest extends \PHPUnit_Framework_TestCase
             'solver-event',
             $this->composer,
             $this->io,
+            false,
             $this->getMock('Composer\DependencyResolver\PolicyInterface'),
             $pool,
             $compositeRepo,
@@ -203,11 +208,27 @@ class CoreManagerTest extends \PHPUnit_Framework_TestCase
         $rootPackage->setExtra(array('magento-root-dir' => 'htdocs'));
         $this->composer->setPackage($rootPackage);
 
+        $pool = $this->getMockBuilder('Composer\DependencyResolver\Pool')
+            ->disableOriginalConstructor()
+            ->getMock();
+
+        $request = $this->getMockBuilder('Composer\DependencyResolver\Request')
+            ->disableOriginalConstructor()
+            ->getMock();
+
+
+        $compositeRepo = new CompositeRepository(array($this->localRepository));
+
         $event = new PackageEvent(
             'install-event',
             $this->composer,
             $this->io,
             false,
+            $this->getMock('Composer\DependencyResolver\PolicyInterface'),
+            $pool,
+            $compositeRepo,
+            $request,
+            array(),
             new InstallOperation($corePackage)
         );
 
@@ -224,6 +245,55 @@ class CoreManagerTest extends \PHPUnit_Framework_TestCase
         $plugin->installCore($event);
     }
 
+    public function testInstallCoreFromInstallOperationCreateRootDirectoryIfItDoesNotExist()
+    {
+
+        $corePackage = $this->createCorePackage();
+
+        $rootPackage = new RootPackage('some/project', '1.0.0', 'some/project');
+        $rootPackage->setExtra(array('magento-root-dir' => 'htdocs'));
+        $this->composer->setPackage($rootPackage);
+
+        $pool = $this->getMockBuilder('Composer\DependencyResolver\Pool')
+            ->disableOriginalConstructor()
+            ->getMock();
+
+        $request = $this->getMockBuilder('Composer\DependencyResolver\Request')
+            ->disableOriginalConstructor()
+            ->getMock();
+
+
+        $compositeRepo = new CompositeRepository(array($this->localRepository));
+
+        $event = new PackageEvent(
+            'install-event',
+            $this->composer,
+            $this->io,
+            false,
+            $this->getMock('Composer\DependencyResolver\PolicyInterface'),
+            $pool,
+            $compositeRepo,
+            $request,
+            array(),
+            new InstallOperation($corePackage)
+        );
+
+        $plugin = $this->getPluginWithMockedInstaller('install');
+
+        $l  = '  - <comment>MagentoCoreInstaller: </comment>';
+        $l .= '<info>Installing: "magento/core-package" version: "1.0.0" to: "htdocs"</info>';
+
+        $this->io->expects($this->once())
+            ->method('write')
+            ->with($l);
+
+        $this->assertFileNotExists('htdocs');
+
+        $plugin->activate($this->composer, $this->io);
+        $plugin->installCore($event);
+        $this->assertFileExists('htdocs');
+    }
+
     public function testInstallCoreFromUpdateOperation()
     {
         $corePackage = $this->createCorePackage();
@@ -232,11 +302,27 @@ class CoreManagerTest extends \PHPUnit_Framework_TestCase
         $rootPackage->setExtra(array('magento-root-dir' => 'htdocs'));
         $this->composer->setPackage($rootPackage);
 
+        $pool = $this->getMockBuilder('Composer\DependencyResolver\Pool')
+            ->disableOriginalConstructor()
+            ->getMock();
+
+        $request = $this->getMockBuilder('Composer\DependencyResolver\Request')
+            ->disableOriginalConstructor()
+            ->getMock();
+
+
+        $compositeRepo = new CompositeRepository(array($this->localRepository));
+
         $event = new PackageEvent(
             'install-event',
             $this->composer,
             $this->io,
             false,
+            $this->getMock('Composer\DependencyResolver\PolicyInterface'),
+            $pool,
+            $compositeRepo,
+            $request,
+            array(),
             new UpdateOperation($this->createCorePackage('magento/initial'), $corePackage)
         );
 
@@ -261,11 +347,26 @@ class CoreManagerTest extends \PHPUnit_Framework_TestCase
         $rootPackage->setExtra(array('magento-root-dir' => 'htdocs'));
         $this->composer->setPackage($rootPackage);
 
+        $pool = $this->getMockBuilder('Composer\DependencyResolver\Pool')
+            ->disableOriginalConstructor()
+            ->getMock();
+
+        $request = $this->getMockBuilder('Composer\DependencyResolver\Request')
+            ->disableOriginalConstructor()
+            ->getMock();
+
+        $compositeRepo = new CompositeRepository(array($this->localRepository));
+
         $event = new PackageEvent(
             'install-event',
             $this->composer,
             $this->io,
             false,
+            $this->getMock('Composer\DependencyResolver\PolicyInterface'),
+            $pool,
+            $compositeRepo,
+            $request,
+            array(),
             new UninstallOperation($corePackage)
         );
 
@@ -290,11 +391,27 @@ class CoreManagerTest extends \PHPUnit_Framework_TestCase
         $rootPackage->setExtra(array('magento-root-dir' => 'htdocs'));
         $this->composer->setPackage($rootPackage);
 
+        $pool = $this->getMockBuilder('Composer\DependencyResolver\Pool')
+            ->disableOriginalConstructor()
+            ->getMock();
+
+        $request = $this->getMockBuilder('Composer\DependencyResolver\Request')
+            ->disableOriginalConstructor()
+            ->getMock();
+
+
+        $compositeRepo = new CompositeRepository(array($this->localRepository));
+
         $event = new PackageEvent(
             'install-event',
             $this->composer,
             $this->io,
             false,
+            $this->getMock('Composer\DependencyResolver\PolicyInterface'),
+            $pool,
+            $compositeRepo,
+            $request,
+            array(),
             new UpdateOperation($corePackage, $this->createCorePackage('magento/target'))
         );
 
@@ -372,5 +489,13 @@ class CoreManagerTest extends \PHPUnit_Framework_TestCase
             'AydinHassan\MagentoCoreComposerInstaller\CoreInstaller',
             $this->plugin->getInstaller($this->getOptions())
         );
+    }
+
+    public function tearDown()
+    {
+        if (file_exists('htdocs')) {
+            $fs = new Filesystem;
+            $fs->remove('htdocs');
+        }
     }
 }
