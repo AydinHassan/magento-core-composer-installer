@@ -8,8 +8,8 @@ use Composer\EventDispatcher\EventSubscriberInterface;
 use Composer\Installer\InstallerEvent;
 use Composer\IO\IOInterface;
 use Composer\Plugin\PluginInterface;
-use Composer\Script\ScriptEvents;
 use Composer\Installer\InstallerEvents;
+use Composer\Installer\PackageEvents;
 use Composer\Script\PackageEvent;
 use Composer\Util\Filesystem;
 use Composer\Package\PackageInterface;
@@ -106,16 +106,16 @@ class CoreManager implements PluginInterface, EventSubscriberInterface
             InstallerEvents::POST_DEPENDENCIES_SOLVING => array(
                 array('checkCoreDependencies', 0)
             ),
-            ScriptEvents::POST_PACKAGE_INSTALL => array(
+            PackageEvents::POST_PACKAGE_INSTALL => array(
                 array('installCore', 0)
             ),
-            ScriptEvents::PRE_PACKAGE_UPDATE => array(
+            PackageEvents::PRE_PACKAGE_UPDATE => array(
                 array('uninstallCore', 0)
             ),
-            ScriptEvents::POST_PACKAGE_UPDATE => array(
+            PackageEvents::POST_PACKAGE_UPDATE => array(
                 array('installCore', 0)
             ),
-            ScriptEvents::PRE_PACKAGE_UNINSTALL => array(
+            PackageEvents::PRE_PACKAGE_UNINSTALL => array(
                 array('uninstallCore', 0)
             ),
         );
