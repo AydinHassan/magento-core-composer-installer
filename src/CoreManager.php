@@ -173,6 +173,7 @@ class CoreManager implements PluginInterface, EventSubscriberInterface
 
         if ($package->getType() === $this->type) {
             $options = new Options($this->composer->getPackage()->getExtra());
+            $this->ensureRootDirExists($options);
 
             $this->io->write(
                 sprintf(
@@ -222,6 +223,22 @@ class CoreManager implements PluginInterface, EventSubscriberInterface
         }
     }
 
+
+    /**
+     * Create root directory if it doesn't exist already
+     *
+     * @param Options $options
+     */
+    private function ensureRootDirExists(Options $options)
+    {
+        if (!file_exists($options->getMagentoRootDir())) {
+            mkdir($options->getMagentoRootDir(), 0755, true);
+        }
+    }
+
+    /**
+     * @param Options $options
+     */
     public function getInstaller(Options $options)
     {
         $exclude = new Exclude($options->getDeployExcludes());
