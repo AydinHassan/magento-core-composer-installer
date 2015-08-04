@@ -31,6 +31,11 @@ class GitIgnore
     protected $hasChanges = false;
 
     /**
+     * @var bool
+     */
+    protected $disabled = false;
+    
+    /**
      * @param string $fileLocation
      * @param array $directoriesToIgnoreEntirely
      * @param bool $gitIgnoreAppend
@@ -112,11 +117,16 @@ class GitIgnore
      */
     public function __destruct()
     {
-        if ($this->hasChanges) {
+        if ($this->hasChanges && !$this->disabled) {
             file_put_contents($this->gitIgnoreLocation, implode("\n", $this->lines));
         }
     }
-
+    
+    public function disable()
+    {
+        $this->disabled = true;
+    }
+    
     /**
      * Add entries to for all directories ignored entirely.
      */
