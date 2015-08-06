@@ -115,6 +115,15 @@ class Options
      */
     protected $appendToGitIgnore = true;
 
+
+    /**
+     * Whether to append to the existing git ignore or remove it
+     * and start fresh
+     *
+     * @var bool
+     */
+    protected $noGitignore = false;
+    
     /**
      * Magento Root Directory
      *
@@ -158,6 +167,10 @@ class Options
             throw new \InvalidArgumentException("magento-root-dir must be specified in root package");
         }
 
+        if (isset($coreInstallerOptions['magento-no-gitignore'])) {
+            $this->noGitignore = $coreInstallerOptions['magento-no-gitignore'];
+        }        
+        
         $this->magentoRootDir = rtrim($packageExtra['magento-root-dir'], "/");
     }
 
