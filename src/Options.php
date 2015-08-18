@@ -25,6 +25,7 @@ class Options
         '/app/code/core/Mage',
         '/app/code/core/Zend',
         '/app/code/core/Enterprise',
+        '/dev',
         '/lib/Zend',
         '/lib/Varien',
         '/lib/Magento',

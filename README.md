@@ -132,7 +132,7 @@ Example configuration:
          }
     }
     
-The above config will, install everything from the core package, except the file `.htaccess`, it will will group all files
+The above config will, install everything from the core package, except the file `.htaccess`, it will group all files
 under `lib\Zend` in the `htdocs\.gitignore` file. And it will wipe the `htdocs\.gitignore` every time Magento is updated or removed. 
  
 
