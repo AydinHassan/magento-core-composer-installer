@@ -82,6 +82,37 @@ class CoreInstallerTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($this->root->hasChild('destination/folder1/file1.txt'));
     }
 
+    public function testIfBrokenSymlinkExistsWhereDirShouldBeExceptionIsThrown()
+    {
+        $tempSourceDir      = sprintf('%s/%s/source', sys_get_temp_dir(), $this->getName());
+        $tempDestinationDir = sprintf('%s/%s/destination', sys_get_temp_dir(), $this->getName());
+        mkdir($tempSourceDir, 0777, true);
+        mkdir($tempDestinationDir, 0777, true);
+
+        mkdir(sprintf('%s/directory', $tempSourceDir));
+
+        @symlink('nonexistentfolder', sprintf('%s/directory', $tempDestinationDir));
+
+        try {
+            $this->installer->install($tempSourceDir, $tempDestinationDir);
+        } catch (\RuntimeException $e) {
+            $this->assertInstanceOf('RuntimeException', $e);
+            $this->assertEquals(
+                sprintf(
+                    'File: "%s/directory" appears to be a broken symlink referencing: "nonexistentfolder"',
+                    $tempDestinationDir
+                ),
+                $e->getMessage()
+            );
+        }
+
+        rmdir(sprintf('%s/directory', $tempSourceDir));
+        rmdir($tempSourceDir);
+
+        unlink(sprintf('%s/directory', $tempDestinationDir));
+        rmdir($tempDestinationDir);
+    }
+
     public function testExcludedFilesAreNotCopied()
     {
         $exclude = new Exclude(array('file1.txt', 'folder1/file2.txt'));

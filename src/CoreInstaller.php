@@ -3,6 +3,7 @@
 namespace AydinHassan\MagentoCoreComposerInstaller;
 
 use Composer\Util\Filesystem;
+use ErrorException;
 use RecursiveIteratorIterator;
 use RecursiveDirectoryIterator;
 
@@ -58,7 +59,18 @@ class CoreInstaller
             }
 
             if ($item->isDir()) {
-                if (!file_exists($destinationFile)) {
+                $fileExists = file_exists($destinationFile);
+                if (!$fileExists && is_link($destinationFile)) {
+                    throw new \RuntimeException(
+                        sprintf(
+                            'File: "%s" appears to be a broken symlink referencing: "%s"',
+                            $destinationFile,
+                            readlink($destinationFile)
+                        )
+                    );
+                }
+
+                if (!$fileExists) {
                     mkdir($destinationFile);
                 }
                 continue;
