@@ -158,7 +158,7 @@ Add new Magento version script: https://gist.github.com/AydinHassan/6ed0bf2219ea
 
 1. Create a repository or clone an existing one: `cd && mkdir magento-mirror && git init`
 2. Download a version of Magento and extract it: `cd && tar -xzf magento.tar.gz`
-3. Download this script to your home directory: `cd && curl https://gist.githubusercontent.com/AydinHassan/6ed0bf2219ea0f122402/raw/9806e969195ef42bee42ba1da38838914c5e7d74/add-magento-version.php -o add-magento-version.php`
+3. Download this script to your home directory: `cd && curl https://gist.githubusercontent.com/AydinHassan/6ed0bf2219ea0f122402/raw/28d1e629947ef4e92082914172c5000a417d87c5/add-magento-version.php -o add-magento-version.php`
 4. Run it with the locations of your repository and the extracted Magento code: `php add-magento-version.php ~/magento-mirror ~/magento`
 5. The new version will be committed & tagged. You can now push this up to the remote.
 
