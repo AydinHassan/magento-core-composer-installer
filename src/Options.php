@@ -15,6 +15,8 @@ class Options
      */
     protected $deployExcludes = array(
         ".git",
+        "composer.lock",
+        "composer.json",
     );
 
     /**
