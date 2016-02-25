@@ -54,9 +54,8 @@ class Exclude
     {
         try {
             new \RegexIterator(new \ArrayIterator(array()), $string);
-
             return true;
-        } catch(\InvalidArgumentException $e) {
+        } catch (\InvalidArgumentException $e) {
             return false;
         }
     }
