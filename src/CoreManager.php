@@ -128,7 +128,7 @@ class CoreManager implements PluginInterface, EventSubscriberInterface
     {
         $installedCorePackages = array();
         foreach ($event->getInstalledRepo()->getPackages() as $package) {
-            if ($package->getType() === $this->type) {
+            if ($this->packageIsMagentoCore($package)) {
                 $installedCorePackages[$package->getName()] = $package;
             }
         }
@@ -139,7 +139,7 @@ class CoreManager implements PluginInterface, EventSubscriberInterface
 
         foreach ($operations as $operation) {
             $p = $operation->getPackage();
-            if ($p->getType() === $this->type) {
+            if ($this->packageIsMagentoCore($p)) {
                 switch ($operation->getJobType()) {
                     case "uninstall":
                         unset($installedCorePackages[$p->getName()]);
@@ -171,7 +171,7 @@ class CoreManager implements PluginInterface, EventSubscriberInterface
                 break;
         }
 
-        if ($package->getType() === $this->type) {
+        if ($this->packageIsMagentoCore($package)) {
             $options = new Options($this->composer->getPackage()->getExtra());
             $this->ensureRootDirExists($options);
 
@@ -204,7 +204,7 @@ class CoreManager implements PluginInterface, EventSubscriberInterface
                 break;
         }
 
-        if ($package->getType() === $this->type) {
+        if ($this->packageIsMagentoCore($package)) {
 
             $options = new Options($this->composer->getPackage()->getExtra());
 
@@ -223,6 +223,16 @@ class CoreManager implements PluginInterface, EventSubscriberInterface
         }
     }
 
+    protected function packageIsMagentoCore(PackageInterface $package)
+    {
+        $options = new Options($this->composer->getPackage()->getExtra());
+        if ($name = $options->getMagentoCorePackageName()) {
+            return ($package->getName() === $name);
+        } else {
+            return ($package->getType() === $this->type);
+        }
+    }
+
 
     /**
      * Create root directory if it doesn't exist already
@@ -238,6 +248,7 @@ class CoreManager implements PluginInterface, EventSubscriberInterface
 
     /**
      * @param Options $options
+     * @return CoreInstaller
      */
     public function getInstaller(Options $options)
     {
