@@ -74,6 +74,10 @@ class CoreManagerTest extends \PHPUnit_Framework_TestCase
 
     public function testCheckCoreDependenciesThrowsExceptionIfMoreThan2CorePackagesRequired()
     {
+        $rootPackage = new RootPackage('some/project', '1.0.0', 'some/project');
+        $rootPackage->setExtra(array('magento-root-dir' => 'htdocs'));
+        $this->composer->setPackage($rootPackage);
+
         $this->localRepository->addPackage($this->createCorePackage());
         $this->localRepository->addPackage($this->createCorePackage('magento/core2-package'));
 
@@ -106,6 +110,10 @@ class CoreManagerTest extends \PHPUnit_Framework_TestCase
 
     public function testCheckCoreDependenciesIsSuccessfulWith1CorePackage()
     {
+        $rootPackage = new RootPackage('some/project', '1.0.0', 'some/project');
+        $rootPackage->setExtra(array('magento-root-dir' => 'htdocs'));
+        $this->composer->setPackage($rootPackage);
+
         $this->localRepository->addPackage($this->createCorePackage());
 
         $pool = $this->getMockBuilder('Composer\DependencyResolver\Pool')
@@ -136,6 +144,10 @@ class CoreManagerTest extends \PHPUnit_Framework_TestCase
 
     public function testCheckCoreDependenciesThrowsExceptionWhenASecondCorePackageIsRequired()
     {
+        $rootPackage = new RootPackage('some/project', '1.0.0', 'some/project');
+        $rootPackage->setExtra(array('magento-root-dir' => 'htdocs'));
+        $this->composer->setPackage($rootPackage);
+
         $corePackage1   = $this->createCorePackage();
         $corePackage2   = $this->createCorePackage('magento/core2-package');
         $installOp      = new InstallOperation($corePackage2);
@@ -169,6 +181,10 @@ class CoreManagerTest extends \PHPUnit_Framework_TestCase
 
     public function testCheckCoreDependenciesIsSuccesfulWhenRemoving1CorePackageAndAddingAnother()
     {
+        $rootPackage = new RootPackage('some/project', '1.0.0', 'some/project');
+        $rootPackage->setExtra(array('magento-root-dir' => 'htdocs'));
+        $this->composer->setPackage($rootPackage);
+
         $corePackage1   = $this->createCorePackage();
         $corePackage2   = $this->createCorePackage('magento/core2-package');
         $installOp      = new InstallOperation($corePackage2);
@@ -202,11 +218,11 @@ class CoreManagerTest extends \PHPUnit_Framework_TestCase
 
     public function testInstallCoreFromInstallOperation()
     {
-        $corePackage = $this->createCorePackage();
-
         $rootPackage = new RootPackage('some/project', '1.0.0', 'some/project');
         $rootPackage->setExtra(array('magento-root-dir' => 'htdocs'));
         $this->composer->setPackage($rootPackage);
+
+        $corePackage = $this->createCorePackage();
 
         $pool = $this->getMockBuilder('Composer\DependencyResolver\Pool')
             ->disableOriginalConstructor()
