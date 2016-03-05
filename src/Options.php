@@ -126,6 +126,13 @@ class Options
     protected $magentoRootDir;
 
     /**
+     * Name of Magento Core Package
+     *
+     * @var string
+     */
+    protected $magentoCorePackageType = 'magento-core';
+
+    /**
      * @param array $packageExtra
      */
     public function __construct(array $packageExtra)
@@ -161,6 +168,10 @@ class Options
             throw new \InvalidArgumentException("magento-root-dir must be specified in root package");
         }
 
+        if (isset($packageExtra['magento-core-package-type'])) {
+            $this->magentoCorePackageType = $packageExtra['magento-core-package-type'];
+        }
+
         $this->magentoRootDir = rtrim($packageExtra['magento-root-dir'], "/");
     }
 
@@ -194,5 +205,13 @@ class Options
     public function getMagentoRootDir()
     {
         return $this->magentoRootDir;
+    }
+
+    /**
+     * @return string
+     */
+    public function getMagentoCorePackageType()
+    {
+        return $this->magentoCorePackageType;
     }
 }

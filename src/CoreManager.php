@@ -21,12 +21,6 @@ use Composer\Package\PackageInterface;
  */
 class CoreManager implements PluginInterface, EventSubscriberInterface
 {
-    /**
-     * The type of packages this script should operate on
-     *
-     * @var string
-     */
-    protected $type = 'magento-core';
 
     /**
      * @var Composer
@@ -126,9 +120,10 @@ class CoreManager implements PluginInterface, EventSubscriberInterface
      */
     public function checkCoreDependencies(InstallerEvent $event)
     {
+        $options = new Options($this->composer->getPackage()->getExtra());
         $installedCorePackages = array();
         foreach ($event->getInstalledRepo()->getPackages() as $package) {
-            if ($package->getType() === $this->type) {
+            if ($package->getType() === $options->getMagentoCorePackageType()) {
                 $installedCorePackages[$package->getName()] = $package;
             }
         }
@@ -139,7 +134,7 @@ class CoreManager implements PluginInterface, EventSubscriberInterface
 
         foreach ($operations as $operation) {
             $p = $operation->getPackage();
-            if ($p->getType() === $this->type) {
+            if ($package->getType() === $options->getMagentoCorePackageType()) {
                 switch ($operation->getJobType()) {
                     case "uninstall":
                         unset($installedCorePackages[$p->getName()]);
@@ -171,8 +166,8 @@ class CoreManager implements PluginInterface, EventSubscriberInterface
                 break;
         }
 
-        if ($package->getType() === $this->type) {
-            $options = new Options($this->composer->getPackage()->getExtra());
+        $options = new Options($this->composer->getPackage()->getExtra());
+        if ($package->getType() === $options->getMagentoCorePackageType()) {
             $this->ensureRootDirExists($options);
 
             $this->io->write(
@@ -204,10 +199,8 @@ class CoreManager implements PluginInterface, EventSubscriberInterface
                 break;
         }
 
-        if ($package->getType() === $this->type) {
-
-            $options = new Options($this->composer->getPackage()->getExtra());
-
+        $options = new Options($this->composer->getPackage()->getExtra());
+        if ($package->getType() === $options->getMagentoCorePackageType()) {
             $this->io->write(
                 sprintf(
                     '%s<info>Removing: "%s" version: "%s" from: "%s"</info>',
@@ -223,7 +216,6 @@ class CoreManager implements PluginInterface, EventSubscriberInterface
         }
     }
 
-
     /**
      * Create root directory if it doesn't exist already
      *
@@ -238,6 +230,7 @@ class CoreManager implements PluginInterface, EventSubscriberInterface
 
     /**
      * @param Options $options
+     * @return CoreInstaller
      */
     public function getInstaller(Options $options)
     {
