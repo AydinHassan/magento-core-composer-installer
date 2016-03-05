@@ -25,13 +25,13 @@ class CoreInstallerTest extends \PHPUnit_Framework_TestCase
             ->setMethods(array('addEntry', 'removeEntry', 'removeIgnoreDirectories', '__destruct'))
             ->getMock();
 
-        $this->installer = new CoreInstaller(new Exclude, $this->gitIgnore, new Filesystem);
+        $this->installer = new CoreInstaller(new Exclude('/src/path'), $this->gitIgnore, new Filesystem);
         $this->root      = vfsStream::setup('root', null, array('source' => array(), 'destination' => array()));
     }
 
     public function testInstallerCopiesAllFilesAndAppendsToGitIgnore()
     {
-        $this->installer = new CoreInstaller(new Exclude, $this->gitIgnore, new Filesystem);
+        $this->installer = new CoreInstaller(new Exclude('/src/path'), $this->gitIgnore, new Filesystem);
 
         $source = $this->root->getChild('source');
         vfsStream::newFile('file1.txt')->at($source);
@@ -71,7 +71,7 @@ class CoreInstallerTest extends \PHPUnit_Framework_TestCase
 
     public function testIfFolderExistsInDestinationItemIsSkipped()
     {
-        $this->installer = new CoreInstaller(new Exclude, $this->gitIgnore, new Filesystem);
+        $this->installer = new CoreInstaller(new Exclude('/src/path'), $this->gitIgnore, new Filesystem);
 
         vfsStream::newDirectory('folder1')->at($this->root->getChild('source'));
         vfsStream::newDirectory('folder1')->at($this->root->getChild('destination'));
@@ -115,7 +115,7 @@ class CoreInstallerTest extends \PHPUnit_Framework_TestCase
 
     public function testExcludedFilesAreNotCopied()
     {
-        $exclude = new Exclude(array('file1.txt', 'folder1/file2.txt'));
+        $exclude = new Exclude(('/src/path'), array('file1.txt', 'folder1/file2.txt'));
         $this->installer = new CoreInstaller($exclude, $this->gitIgnore, new Filesystem);
 
         $source = $this->root->getChild('source');
@@ -200,7 +200,7 @@ class CoreInstallerTest extends \PHPUnit_Framework_TestCase
     {
         $this->createDirStructureForUnInstaller();
         $this->installer = new CoreInstaller(
-            new Exclude(array('file1.txt', 'folder1/file3.txt')),
+            new Exclude('/src/path', array('file1.txt', 'folder1/file3.txt')),
             $this->gitIgnore,
             new Filesystem
         );

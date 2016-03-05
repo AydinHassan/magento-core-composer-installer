@@ -503,7 +503,7 @@ class CoreManagerTest extends \PHPUnit_Framework_TestCase
     {
         $this->assertInstanceOf(
             'AydinHassan\MagentoCoreComposerInstaller\CoreInstaller',
-            $this->plugin->getInstaller($this->getOptions())
+            $this->plugin->getInstaller($this->getOptions(), new Package('some/package', "1.0.0", 'some/package'))
         );
     }
 

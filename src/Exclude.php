@@ -15,11 +15,20 @@ class Exclude
     private $excludes;
 
     /**
+     * Source path of the files to be (maybe) excluded
+     *
+     * @var string
+     */
+    private $sourcePath;
+
+    /**
+     * @param string $sourcePath
      * @param array $excludes
      */
-    public function __construct(array $excludes = array())
+    public function __construct($sourcePath, array $excludes = array())
     {
         $this->excludes = $excludes;
+        $this->sourcePath = $sourcePath;
     }
 
     /**
@@ -31,12 +40,13 @@ class Exclude
     public function exclude($filePath)
     {
         foreach ($this->excludes as $exclude) {
-            if ($this->isRegExp($exclude)) {
-                if (preg_match($exclude, $filePath) !== 0) {
+
+            if ($this->isExcludeDir($exclude)) {
+                if (substr($filePath, 0, strlen($exclude)) === $exclude) {
                     return true;
                 }
-            } elseif (substr($filePath, 0, strlen($exclude)) === $exclude) {
-                return true;
+            } elseif ($exclude === $filePath) {
+                   return true;
             }
         }
 
@@ -44,19 +54,13 @@ class Exclude
     }
 
     /**
-     * Test if the passed is string a valid regular expression
-     *
-     * @param string $string
-     *
+     * @param string $exclude
      * @return bool
      */
-    private function isRegExp($string)
+    private function isExcludeDir($exclude)
     {
-        try {
-            new \RegexIterator(new \ArrayIterator(array()), $string);
-            return true;
-        } catch (\InvalidArgumentException $e) {
-            return false;
-        }
+        return is_dir(
+            sprintf('%s/%s', rtrim($this->sourcePath, '/'), ltrim('/', $exclude))
+        );
     }
 }

@@ -12,22 +12,6 @@ use AydinHassan\MagentoCoreComposerInstaller\Options;
  */
 class ExcludeTest extends \PHPUnit_Framework_TestCase
 {
-    /**
-     * @var Exclude
-     */
-    protected $exclude;
-
-    public function setUp()
-    {
-        $excludes = array(
-            'file1.txt',
-            'file2.txt',
-            'folder1/file3.txt',
-            'folder1/file2.txt',
-            '/^file4\.txt$/',
-        );
-        $this->exclude = new Exclude($excludes);
-    }
 
     /**
      * @param string $file
@@ -36,8 +20,17 @@ class ExcludeTest extends \PHPUnit_Framework_TestCase
      */
     public function testFilesAreCorrectlyExcluded($file, $expectedResult)
     {
-        $res = $this->exclude->exclude($file);
-        $this->assertSame($res, $expectedResult);
+        $exclude = new Exclude(
+            '/src/path',
+            array(
+                'file1.txt',
+                'file2.txt',
+                'folder1/file3.txt',
+                'folder1/file2.txt',
+            )
+        );
+
+        $this->assertSame($exclude->exclude($file), $expectedResult);
     }
 
     /**
@@ -53,22 +46,42 @@ class ExcludeTest extends \PHPUnit_Framework_TestCase
             array('folder1/file1.txt', false),
             array('folder1/file4.txt', false),
             array('file3.txt', false),
-            array('file2.txt.bak', true),
-            array('file4.txt', true),
-            array('file4.txt.bak', false),
+            array('file2.txt.bak', false),
         );
     }
 
 
     public function testSubDirectoriesOfExcludeAreAlsoExcluded()
     {
-        $excludes = array(
-            'folder1',
+        $sourcePath = sprintf('%s/%s', sys_get_temp_dir(), $this->getName());
+        @mkdir($sourcePath, 0775, true);
+        @mkdir(sprintf('%s/%s', $sourcePath, 'folder1'));
+
+        $exclude = new Exclude(
+            $sourcePath,
+            array(
+                'folder1',
+            )
         );
-        $exclude = new Exclude($excludes);
 
         $this->assertTrue($exclude->exclude('folder1/file1.txt'));
         $this->assertTrue($exclude->exclude('folder1/file2.txt'));
         $this->assertTrue($exclude->exclude('folder1/folder2/file3.txt'));
+
+        rmdir(sprintf('%s/%s', $sourcePath, 'folder1'));
+        rmdir($sourcePath);
+    }
+
+    public function testExcludeFileIsNotGreedy()
+    {
+        $exclude = new Exclude(
+            '/src/path',
+            array(
+                'file1.txt',
+            )
+        );
+
+        $this->assertTrue($exclude->exclude('file1.txt'));
+        $this->assertFalse($exclude->exclude('file1.txt.bak'));
     }
 }
