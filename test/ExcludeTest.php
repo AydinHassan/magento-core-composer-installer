@@ -24,6 +24,7 @@ class ExcludeTest extends \PHPUnit_Framework_TestCase
             'file2.txt',
             'folder1/file3.txt',
             'folder1/file2.txt',
+            '/^file4\.txt$/',
         );
         $this->exclude = new Exclude($excludes);
     }
@@ -52,6 +53,9 @@ class ExcludeTest extends \PHPUnit_Framework_TestCase
             array('folder1/file1.txt', false),
             array('folder1/file4.txt', false),
             array('file3.txt', false),
+            array('file2.txt.bak', true),
+            array('file4.txt', true),
+            array('file4.txt.bak', false),
         );
     }
 
