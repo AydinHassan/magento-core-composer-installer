@@ -15,11 +15,20 @@ class Exclude
     private $excludes;
 
     /**
+     * Source path of the files to be (maybe) excluded
+     *
+     * @var string
+     */
+    private $sourcePath;
+
+    /**
+     * @param string $sourcePath
      * @param array $excludes
      */
-    public function __construct(array $excludes = array())
+    public function __construct($sourcePath, array $excludes = array())
     {
         $this->excludes = $excludes;
+        $this->sourcePath = $sourcePath;
     }
 
     /**
@@ -31,11 +40,27 @@ class Exclude
     public function exclude($filePath)
     {
         foreach ($this->excludes as $exclude) {
-            if (substr($filePath, 0, strlen($exclude)) === $exclude) {
-                return true;
+
+            if ($this->isExcludeDir($exclude)) {
+                if (substr($filePath, 0, strlen($exclude)) === $exclude) {
+                    return true;
+                }
+            } elseif ($exclude === $filePath) {
+                   return true;
             }
         }
 
         return false;
+    }
+
+    /**
+     * @param string $exclude
+     * @return bool
+     */
+    private function isExcludeDir($exclude)
+    {
+        return is_dir(
+            sprintf('%s/%s', rtrim($this->sourcePath, '/'), ltrim('/', $exclude))
+        );
     }
 }

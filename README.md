@@ -135,6 +135,39 @@ Example configuration:
 The above config will, install everything from the core package, except the file `.htaccess`, it will group all files
 under `lib\Zend` in the `htdocs\.gitignore` file. And it will wipe the `htdocs\.gitignore` every time Magento is updated or removed. 
  
+### Excludes
+
+Use this to exclude certain files and folders from being copied from the core in to your root directory. If the exclude path you include is actually a folder, everything within that folder will be excluded.
+
+Exclude all files within `lib`
+
+
+    {
+         ...
+         "extra" {
+             "magento-root-dir": "htdocs",
+             "magento-core-deploy" : {
+                "excludes": [ 
+                    "lib"
+                ]
+             }
+         }
+    }
+
+Exclude just `app/etc/local.xml`
+
+    {
+         ...
+         "extra" {
+             "magento-root-dir": "htdocs",
+             "magento-core-deploy" : {
+                "excludes": [ 
+                    "app/etc/local.xml"
+                ]
+             }
+         }
+    }
+
 
 ### Ignore Directories
 

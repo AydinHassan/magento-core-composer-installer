@@ -180,7 +180,7 @@ class CoreManager implements PluginInterface, EventSubscriberInterface
                 )
             );
 
-            $this->getInstaller($options)
+            $this->getInstaller($options, $package)
                 ->install($this->getInstallPath($package), $options->getMagentoRootDir());
         }
     }
@@ -211,7 +211,7 @@ class CoreManager implements PluginInterface, EventSubscriberInterface
                 )
             );
 
-            $this->getInstaller($options)
+            $this->getInstaller($options, $package)
                 ->unInstall($this->getInstallPath($package), $options->getMagentoRootDir());
         }
     }
@@ -230,11 +230,12 @@ class CoreManager implements PluginInterface, EventSubscriberInterface
 
     /**
      * @param Options $options
+     * @param PackageInterface $package
      * @return CoreInstaller
      */
-    public function getInstaller(Options $options)
+    public function getInstaller(Options $options, PackageInterface $package)
     {
-        $exclude = new Exclude($options->getDeployExcludes());
+        $exclude = new Exclude($this->getInstallPath($package), $options->getDeployExcludes());
 
         $gitIgnore = new GitIgnore(
             sprintf("%s/.gitignore", $options->getMagentoRootDir()),
