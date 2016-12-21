@@ -240,6 +240,7 @@ class CoreManager implements PluginInterface, EventSubscriberInterface
         $gitIgnore = new GitIgnore(
             sprintf("%s/.gitignore", $options->getMagentoRootDir()),
             $options->getIgnoreDirectories(),
+            $options->getIgnoreFiles(),
             $options->appendToGitIgnore()
         );
 
