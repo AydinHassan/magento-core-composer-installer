@@ -76,8 +76,30 @@ class CoreInstaller
                 continue;
             }
 
-            copy($item, $destinationFile);
+            $this->installFile($item, $destinationFile);
             $this->gitIgnore->addEntry('/' . $iterator->getSubPathName());
+        }
+    }
+
+    /**
+     * @param string $item
+     * @param string $destinationFile
+     */
+    protected function installFile($item, $destinationFile)
+    {
+        // Hardlinks require to be on same Filesystem/Blockdevice
+        list($source_dev) = stat($item);
+        list($destin_dev) = stat(dirname($destinationFile));
+
+        if (file_exists($destinationFile)) {
+            // Unlink even for copy, to prevent writing into hardlinked file
+            unlink($destinationFile);
+        }
+        if ($source_dev != 0 && $source_dev == $destin_dev) {
+            link($item, $destinationFile); // Hardlink, no symlink
+        } else {
+            // Different Filesystem, or Windows without BlockDevice-Support: Fallback to copy
+            copy($item, $destinationFile);
         }
     }
 
