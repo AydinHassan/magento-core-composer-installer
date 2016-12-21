@@ -112,7 +112,7 @@ class GitIgnore
      */
     public function __destruct()
     {
-        if ($this->hasChanges) {
+        if ($this->hasChanges && file_exists($this->gitIgnoreLocation)) {
             file_put_contents($this->gitIgnoreLocation, implode("\n", $this->lines));
         }
     }
