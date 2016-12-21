@@ -10,7 +10,7 @@ use Composer\IO\IOInterface;
 use Composer\Plugin\PluginInterface;
 use Composer\Installer\InstallerEvents;
 use Composer\Installer\PackageEvents;
-use Composer\Script\PackageEvent;
+use Composer\Installer\PackageEvent;
 use Composer\Util\Filesystem;
 use Composer\Package\PackageInterface;
 
