@@ -119,6 +119,13 @@ class Options
     protected $appendToGitIgnore = true;
 
     /**
+     * Whether the git ignore functionality is enabled
+     *
+     * @var bool
+     */
+    protected $gitIgnoreFunctionalityEnabled = true;
+
+    /**
      * Magento Root Directory
      *
      * @var string
@@ -160,6 +167,10 @@ class Options
             $this->ignoreDirectories = $coreInstallerOptions['ignore-directories'];
         }
 
+        if (isset($coreInstallerOptions['git-ignore-enable'])) {
+            $this->gitIgnoreFunctionalityEnabled = (bool) $coreInstallerOptions['git-ignore-enable'];
+        }
+
         if (isset($coreInstallerOptions['git-ignore-append'])) {
             $this->appendToGitIgnore = (bool) $coreInstallerOptions['git-ignore-append'];
         }
@@ -189,6 +200,14 @@ class Options
     public function getIgnoreDirectories()
     {
         return $this->ignoreDirectories;
+    }
+
+    /**
+     * @return bool
+     */
+    public function gitIgnoreFunctionalityEnabled()
+    {
+        return $this->gitIgnoreFunctionalityEnabled;
     }
 
     /**

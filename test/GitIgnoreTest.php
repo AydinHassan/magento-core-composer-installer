@@ -29,6 +29,15 @@ class GitIgnoreTest extends \PHPUnit_Framework_TestCase
         $this->assertFileExists($this->gitIgnoreFile);
     }
 
+    public function testIfFileNotExistsItIsNotCreated()
+    {
+        $gitIgnore = new GitIgnore($this->gitIgnoreFile, array(), true, false);
+        $gitIgnore->addEntry("file1");
+        unset($gitIgnore);
+
+        $this->assertFileNotExists($this->gitIgnoreFile);
+    }
+
     public function testIfFileExistsExistingLinesAreLoaded()
     {
         $lines = array('line1', 'line2');
