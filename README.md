@@ -113,7 +113,8 @@ Available configuration
  * `excludes` - An array of files to not copy when installing the core, useful if local overrides are necessary, or you want to track a `.htaccess`.
  * `ignore-directories` - An array of folders to group ignores together to make the core `.gitignore` smaller.
  * `git-ignore-append` - Defaults to `true`. Whether to append to the `.gitignore` in the `magento-root-dir` folder. If false it will be wiped out on each deploy.
- 
+ * `git-ignore-enable` - Defaults to `true`. Setting this to `false` will prevent any actions being taken on the `.gitignore` file in the `magento-root-dir` folder.
+
 Example configuration:
 
     {
