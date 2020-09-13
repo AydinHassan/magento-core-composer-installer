@@ -4,12 +4,12 @@
     "type": "composer-plugin",
     "license": "MIT",
     "require": {
-        "php": "^5.5 | ^7.0",
-        "composer-plugin-api": "~1.0"
+        "php": "^7.0",
+        "composer-plugin-api": "^1.0"
     },
     "require-dev": {
         "squizlabs/php_codesniffer": "~1.5",
-        "composer/composer": "^1.3@dev",
+        "composer/composer": "^1.3",
         "phpunit/phpunit": "~4.3",
         "mikey179/vfsstream": "~1.4"
     },
