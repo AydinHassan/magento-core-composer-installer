@@ -64,6 +64,24 @@ class CoreManager implements PluginInterface, EventSubscriberInterface
     }
 
     /**
+     * @param Composer $composer
+     * @param IOInterface $io
+     */
+    public function deactivate(Composer $composer, IOInterface $io)
+    {
+
+    }
+
+    /**
+     * @param Composer $composer
+     * @param IOInterface $io
+     */
+    public function uninstall(Composer $composer, IOInterface $io)
+    {
+
+    }
+
+    /**
      * @param PackageInterface $package
      * @return string
      */
@@ -97,7 +115,7 @@ class CoreManager implements PluginInterface, EventSubscriberInterface
     public static function getSubscribedEvents()
     {
         return array(
-            InstallerEvents::POST_DEPENDENCIES_SOLVING => array(
+            InstallerEvents::PRE_POOL_CREATE => array(
                 array('checkCoreDependencies', 0)
             ),
             PackageEvents::POST_PACKAGE_INSTALL => array(
