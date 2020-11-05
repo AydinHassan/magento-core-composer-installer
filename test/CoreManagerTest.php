@@ -17,6 +17,7 @@ use Composer\Repository\RepositoryManager;
 use Composer\Repository\WritableArrayRepository;
 use Composer\Script\PackageEvent;
 use Composer\Util\Filesystem;
+use Composer\Util\HttpDownloader;
 
 /**
  * Class CoreManagerTest
@@ -32,6 +33,7 @@ class CoreManagerTest extends \PHPUnit_Framework_TestCase
     protected $localRepository;
     protected $plugin;
     protected $tmpDir;
+    protected $httpDownloader;
 
     public function setUp()
     {
@@ -49,7 +51,8 @@ class CoreManagerTest extends \PHPUnit_Framework_TestCase
         ));
 
         $this->io = $this->getMock('Composer\IO\IOInterface');
-        $this->repoManager = new RepositoryManager($this->io, $this->config);
+        $this->httpDownloader = new HttpDownloader($this->io, $this->config);
+        $this->repoManager = new RepositoryManager($this->io, $this->config, $this->httpDownloader);
 
         $this->composer->setRepositoryManager($this->repoManager);
         $this->localRepository = new WritableArrayRepository();
