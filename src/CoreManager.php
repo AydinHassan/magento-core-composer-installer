@@ -13,6 +13,8 @@ use Composer\Installer\PackageEvents;
 use Composer\Installer\PackageEvent;
 use Composer\Util\Filesystem;
 use Composer\Package\PackageInterface;
+use Composer\Repository\PlatformRepository;
+use Composer\Repository\CompositeRepository;
 
 /**
  * Class CoreManager
@@ -115,7 +117,7 @@ class CoreManager implements PluginInterface, EventSubscriberInterface
     public static function getSubscribedEvents()
     {
         return array(
-            InstallerEvents::PRE_POOL_CREATE => array(
+            InstallerEvents::PRE_OPERATIONS_EXEC => array(
                 array('checkCoreDependencies', 0)
             ),
             PackageEvents::POST_PACKAGE_INSTALL => array(
@@ -140,20 +142,27 @@ class CoreManager implements PluginInterface, EventSubscriberInterface
     {
         $options = new Options($this->composer->getPackage()->getExtra());
         $installedCorePackages = array();
-        foreach ($event->getInstalledRepo()->getPackages() as $package) {
-            if ($package->getType() === $options->getMagentoCorePackageType()) {
-                $installedCorePackages[$package->getName()] = $package;
+
+        $platformRepo = new PlatformRepository;
+        $localRepo = $this->composer->getRepositoryManager()->getLocalRepository();
+        $installedRepo = new CompositeRepository(array($localRepo, $platformRepo));
+        $repositories = new CompositeRepository(array_merge(array($installedRepo), $this->composer->getRepositoryManager()->getRepositories()));
+        foreach($repositories->getRepositories() as $repository){
+            foreach ($repository->getPackages() as $package) {
+                if ($package->getType() === $options->getMagentoCorePackageType()) {
+                    $installedCorePackages[$package->getName()] = $package;
+                }
             }
         }
 
-        $operations = array_filter($event->getOperations(), function (OperationInterface $o) {
-            return in_array($o->getJobType(), array('install', 'uninstall'));
+        $operations = array_filter($event->getTransaction()->getOperations(), function (OperationInterface $o) {
+            return in_array($o->getOperationType(), array('install', 'uninstall'));
         });
 
         foreach ($operations as $operation) {
             $p = $operation->getPackage();
-            if ($package->getType() === $options->getMagentoCorePackageType()) {
-                switch ($operation->getJobType()) {
+            if ($package && $package->getType() === $options->getMagentoCorePackageType()) {
+                switch ($operation->getOperationType()) {
                     case "uninstall":
                         unset($installedCorePackages[$p->getName()]);
                         break;
@@ -175,7 +184,7 @@ class CoreManager implements PluginInterface, EventSubscriberInterface
      */
     public function installCore(PackageEvent $event)
     {
-        switch ($event->getOperation()->getJobType()) {
+        switch ($event->getOperation()->getOperationType()) {
             case "install":
                 $package = $event->getOperation()->getPackage();
                 break;
@@ -208,7 +217,7 @@ class CoreManager implements PluginInterface, EventSubscriberInterface
      */
     public function uninstallCore(PackageEvent $event)
     {
-        switch ($event->getOperation()->getJobType()) {
+        switch ($event->getOperation()->getOperationType()) {
             case "update":
                 $package = $event->getOperation()->getInitialPackage();
                 break;
