@@ -14,7 +14,7 @@ use Composer\Package\Package;
 use Composer\Package\RootPackage;
 use Composer\Repository\CompositeRepository;
 use Composer\Repository\RepositoryManager;
-use Composer\Repository\WritableArrayRepository;
+use Composer\Repository\InstalledArrayRepository;
 use Composer\Script\PackageEvent;
 use Composer\Util\Filesystem;
 use Composer\Util\HttpDownloader;
@@ -55,7 +55,7 @@ class CoreManagerTest extends \PHPUnit_Framework_TestCase
         $this->repoManager = new RepositoryManager($this->io, $this->config, $this->httpDownloader);
 
         $this->composer->setRepositoryManager($this->repoManager);
-        $this->localRepository = new WritableArrayRepository();
+        $this->localRepository = new InstalledArrayRepository();
         $this->repoManager->setLocalRepository($this->localRepository);
         $this->plugin = new CoreManager;
         $this->plugin->activate($this->composer, $this->io);
