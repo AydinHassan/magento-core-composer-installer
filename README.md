@@ -1,5 +1,7 @@
 magento-core-composer-installer
 ===============================
+
+[![Build Status](https://github.com/AydinHassan/magento-core-composer-installer/workflows/MagentoCoreComposerInstaller/badge.svg)](https://github.com/AydinHassan/magento-core-composer-installer/actions?query=workflow%3AMagentoCoreComposerInstaller)
 [![Build Status](https://travis-ci.org/AydinHassan/magento-core-composer-installer.svg?branch=master)](https://travis-ci.org/AydinHassan/magento-core-composer-installer)
 [![Latest Stable Version](https://poser.pugx.org/aydin-hassan/magento-core-composer-installer/v/stable.svg)](https://packagist.org/packages/aydin-hassan/magento-core-composer-installer)
 [![Latest Unstable Version](https://poser.pugx.org/aydin-hassan/magento-core-composer-installer/v/unstable.svg)](https://packagist.org/packages/aydin-hassan/magento-core-composer-installer)
@@ -30,7 +32,7 @@ Now updating Magento Core is easy, simply change your require to `"magento/magen
 Compatibility
 -------------
 
-This tool works with any version of PHP >= 5.3. It is automatically tested using Travis on version PHP versions 5.3, 5.4, 5.5 & HHVM. 
+This tool works with any version of PHP >= 7.0. It is automatically tested using Travis on version PHP versions 7.0, 7.1, 7.2, 7.3, 7.4. 
 
 Installation
 ------------
@@ -80,7 +82,7 @@ Overall your projects `composer.json` should look something like:
             "phpunit/phpunit": "~4.4"
         },
         "require": {
-            "aydin-hassan/magento-core-composer-installer" : "~1.0",
+            "aydin-hassan/magento-core-composer-installer" : "^2.0",
             "magento/magento" : "1.9.1.0"
         },
         "authors": [
