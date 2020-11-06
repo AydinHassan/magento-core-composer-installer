@@ -146,8 +146,13 @@ class CoreManager implements PluginInterface, EventSubscriberInterface
         $platformRepo = new PlatformRepository;
         $localRepo = $this->composer->getRepositoryManager()->getLocalRepository();
         $installedRepo = new CompositeRepository(array($localRepo, $platformRepo));
-        $repositories = new CompositeRepository(array_merge(array($installedRepo), $this->composer->getRepositoryManager()->getRepositories()));
-        foreach($repositories->getRepositories() as $repository){
+        $repositories = new CompositeRepository(
+            array_merge(
+                array($installedRepo),
+                $this->composer->getRepositoryManager()->getRepositories()
+            )
+        );
+        foreach ($repositories->getRepositories() as $repository) {
             foreach ($repository->getPackages() as $package) {
                 if ($package->getType() === $options->getMagentoCorePackageType()) {
                     $installedCorePackages[$package->getName()] = $package;
