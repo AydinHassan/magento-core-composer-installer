@@ -53,7 +53,7 @@ class CoreManagerTest extends \PHPUnit_Framework_TestCase
             ),
         ));
 
-        $this->io = $this->getMock('Composer\IO\IOInterface');
+        $this->io = $this->createMock('Composer\IO\IOInterface');
         $this->httpDownloader = new HttpDownloader($this->io, $this->config);
         $this->repoManager = new RepositoryManager($this->io, $this->config, $this->httpDownloader);
 
@@ -104,7 +104,7 @@ class CoreManagerTest extends \PHPUnit_Framework_TestCase
             $this->composer,
             $this->io,
             false,
-            $this->getMock('Composer\DependencyResolver\PolicyInterface'),
+            $this->createMock('Composer\DependencyResolver\PolicyInterface'),
             $transaction
         );
 
@@ -134,7 +134,7 @@ class CoreManagerTest extends \PHPUnit_Framework_TestCase
             $this->composer,
             $this->io,
             false,
-            $this->getMock('Composer\DependencyResolver\PolicyInterface'),
+            $this->createMock('Composer\DependencyResolver\PolicyInterface'),
             $transaction
         );
 
@@ -167,7 +167,7 @@ class CoreManagerTest extends \PHPUnit_Framework_TestCase
             $this->composer,
             $this->io,
             false,
-            $this->getMock('Composer\DependencyResolver\PolicyInterface'),
+            $this->createMock('Composer\DependencyResolver\PolicyInterface'),
             $transaction
         );
 
@@ -199,7 +199,7 @@ class CoreManagerTest extends \PHPUnit_Framework_TestCase
             $this->composer,
             $this->io,
             false,
-            $this->getMock('Composer\DependencyResolver\PolicyInterface'),
+            $this->createMock('Composer\DependencyResolver\PolicyInterface'),
             $transaction
         );
 
