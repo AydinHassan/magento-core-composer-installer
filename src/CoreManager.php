@@ -147,10 +147,7 @@ class CoreManager implements PluginInterface, EventSubscriberInterface
         $localRepo = $this->composer->getRepositoryManager()->getLocalRepository();
         $installedRepo = new CompositeRepository(array($localRepo, $platformRepo));
         $repositories = new CompositeRepository(
-            array_merge(
-                array($installedRepo),
-                $this->composer->getRepositoryManager()->getRepositories()
-            )
+            array($installedRepo)
         );
         foreach ($repositories->getRepositories() as $repository) {
             foreach ($repository->getPackages() as $package) {
