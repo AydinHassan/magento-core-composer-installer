@@ -10,7 +10,7 @@
     "require-dev": {
         "squizlabs/php_codesniffer": "~1.5",
         "composer/composer": "^2.0",
-        "phpunit/phpunit": "^5.0",
+        "phpunit/phpunit": "^6.0",
         "mikey179/vfsstream": "~1.4"
     },
     "authors": [

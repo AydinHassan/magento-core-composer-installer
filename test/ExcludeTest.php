@@ -10,7 +10,7 @@ use AydinHassan\MagentoCoreComposerInstaller\Options;
  * @package AydinHassan\MagentoCoreComposerInstallerTest
  * @author Aydin Hassan <aydin@hotmail.co.uk>
  */
-class ExcludeTest extends \PHPUnit_Framework_TestCase
+class ExcludeTest extends \PHPUnit\Framework\TestCase
 {
 
     /**

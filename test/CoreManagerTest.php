@@ -27,7 +27,7 @@ use Composer\Util\HttpDownloader;
  * @package AydinHassan\MagentoCoreComposerInstallerTest
  * @author Aydin Hassan <aydin@hotmail.co.uk>
  */
-class CoreManagerTest extends \PHPUnit_Framework_TestCase
+class CoreManagerTest extends \PHPUnit\Framework\TestCase
 {
     protected $composer;
     protected $config;
@@ -108,10 +108,14 @@ class CoreManagerTest extends \PHPUnit_Framework_TestCase
             $transaction
         );
 
-        $this->setExpectedException('RuntimeException', 'Cannot use more than 1 core package');
+        $this->expectException('RuntimeException');
+        $this->expectExceptionMessage('Cannot use more than 1 core package');
         $this->plugin->checkCoreDependencies($installerEvent);
     }
 
+    /**
+     * @doesNotPerformAssertions
+     */
     public function testCheckCoreDependenciesIsSuccessfulWith1CorePackage()
     {
         $rootPackage = new RootPackage('some/project', '1.0.0', 'some/project');
@@ -171,10 +175,14 @@ class CoreManagerTest extends \PHPUnit_Framework_TestCase
             $transaction
         );
 
-        $this->setExpectedException('RuntimeException', 'Cannot use more than 1 core package');
+        $this->expectException('RuntimeException');
+        $this->expectExceptionMessage('Cannot use more than 1 core package');
         $this->plugin->checkCoreDependencies($installerEvent);
     }
 
+    /**
+     * @doesNotPerformAssertions
+     */
     public function testCheckCoreDependenciesIsSuccesfulWhenRemoving1CorePackageAndAddingAnother()
     {
         $rootPackage = new RootPackage('some/project', '1.0.0', 'some/project');
@@ -206,6 +214,9 @@ class CoreManagerTest extends \PHPUnit_Framework_TestCase
         $this->plugin->checkCoreDependencies($installerEvent);
     }
 
+    /**
+     * @doesNotPerformAssertions
+     */
     public function testInstallCoreFromInstallOperation()
     {
         $rootPackage = new RootPackage('some/project', '1.0.0', 'some/project');
@@ -248,13 +259,9 @@ class CoreManagerTest extends \PHPUnit_Framework_TestCase
         $rootPackage->setExtra(array('magento-root-dir' => 'htdocs'));
         $this->composer->setPackage($rootPackage);
 
-        $pool = $this->getMockBuilder('Composer\DependencyResolver\Pool')
-            ->disableOriginalConstructor()
-            ->getMock();
+        $pool = $this->createMock('Composer\DependencyResolver\Pool');
 
-        $request = $this->getMockBuilder('Composer\DependencyResolver\Request')
-            ->disableOriginalConstructor()
-            ->getMock();
+        $request = $this->createMock('Composer\DependencyResolver\Request');
 
 
         $compositeRepo = new CompositeRepository(array($this->localRepository));
@@ -285,6 +292,9 @@ class CoreManagerTest extends \PHPUnit_Framework_TestCase
         $this->assertFileExists('htdocs');
     }
 
+    /**
+     * @doesNotPerformAssertions
+     */
     public function testInstallCoreFromUpdateOperation()
     {
         $corePackage = $this->createCorePackage();
@@ -318,6 +328,9 @@ class CoreManagerTest extends \PHPUnit_Framework_TestCase
         $plugin->installCore($event);
     }
 
+    /**
+     * @doesNotPerformAssertions
+     */
     public function testUnInstallCoreFromUnInstallOperation()
     {
         $corePackage = $this->createCorePackage();
@@ -351,6 +364,9 @@ class CoreManagerTest extends \PHPUnit_Framework_TestCase
         $plugin->uninstallCore($event);
     }
 
+    /**
+     * @doesNotPerformAssertions
+     */
     public function testUnInstallCoreFromUpdateOperation()
     {
         $corePackage = $this->createCorePackage();
@@ -416,13 +432,11 @@ class CoreManagerTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @return \PHPUnit_Framework_MockObject_MockObject
+     * @return \PHPUnit\Framework\MockObject\MockObject
      */
     private function getPluginWithMockedInstaller($installerMethod)
     {
-        $installer = $this->getMockBuilder('AydinHassan\MagentoCoreComposerInstaller\CoreInstaller')
-            ->disableOriginalConstructor()
-            ->getMock();
+        $installer = $this->createMock('AydinHassan\MagentoCoreComposerInstaller\CoreInstaller');
 
         $installer->expects($this->once())
             ->method($installerMethod);
