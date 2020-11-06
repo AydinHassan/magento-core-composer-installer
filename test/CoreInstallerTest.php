@@ -12,7 +12,7 @@ use org\bovigo\vfs\vfsStream;
  * @package AydinHassan\MagentoCoreComposerInstallerTest
  * @author Aydin Hassan <aydin@hotmail.co.uk>
  */
-class CoreInstallerTest extends \PHPUnit_Framework_TestCase
+class CoreInstallerTest extends \PHPUnit\Framework\TestCase
 {
     protected $installer;
     protected $gitIgnore;

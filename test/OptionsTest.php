@@ -9,7 +9,7 @@ use AydinHassan\MagentoCoreComposerInstaller\Options;
  * @package AydinHassan\MagentoCoreComposerInstallerTest
  * @author Aydin Hassan <aydin@hotmail.co.uk>
  */
-class OptionsTest extends \PHPUnit_Framework_TestCase
+class OptionsTest extends \PHPUnit\Framework\TestCase
 {
     public function testDefaults()
     {
@@ -23,7 +23,8 @@ class OptionsTest extends \PHPUnit_Framework_TestCase
 
     public function testExceptionIsThrownIfMagentoRootDirIsNotSet()
     {
-        $this->setExpectedException('InvalidArgumentException', 'magento-root-dir must be specified in root package');
+        $this->expectException('InvalidArgumentException');
+        $this->expectExceptionMessage('magento-root-dir must be specified in root package');
         new Options(array());
     }
 
@@ -43,10 +44,10 @@ class OptionsTest extends \PHPUnit_Framework_TestCase
 
     public function testExceptionIsThrownIfExcludesIsNotAnArray()
     {
-        $this->setExpectedException(
-            'InvalidArgumentException',
-            'excludes must be an array of files/directories to ignore'
+        $this->expectException(
+            'InvalidArgumentException'
         );
+        $this->expectExceptionMessage('excludes must be an array of files/directories to ignore');
 
         new Options(array(
             'magento-root-dir'      => '/',
@@ -72,10 +73,10 @@ class OptionsTest extends \PHPUnit_Framework_TestCase
 
     public function testExceptionIsThrownIfIgnoreDirsIsNotAnArray()
     {
-        $this->setExpectedException(
-            'InvalidArgumentException',
-            'ignore-directories must be an array of files/directories'
+        $this->expectException(
+            'InvalidArgumentException'
         );
+        $this->expectExceptionMessage('ignore-directories must be an array of files/directories');
 
         new Options(array(
             'magento-root-dir'      => '/',

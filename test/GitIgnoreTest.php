@@ -10,7 +10,7 @@ use org\bovigo\vfs\vfsStream;
  * @package AydinHassan\MagentoCoreComposerInstallerTest
  * @author Aydin Hassan <aydin@hotmail.co.uk>
  */
-class GitIgnoreTest extends \PHPUnit_Framework_TestCase
+class GitIgnoreTest extends \PHPUnit\Framework\TestCase
 {
     protected $gitIgnoreFile;
 
