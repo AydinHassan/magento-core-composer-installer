@@ -32,12 +32,6 @@
     "extra": {
         "class": "\\AydinHassan\\MagentoCoreComposerInstaller\\CoreManager"
     },
-    "config": {
-        "platform-check": false,
-        "platform": {
-            "php": "8.0"
-        }
-    },
     "scripts": {
         "cs": [
             "phpcs --standard=PSR12 ./src/",
