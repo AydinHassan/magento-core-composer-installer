@@ -18,7 +18,7 @@ class CoreInstallerTest extends \PHPUnit\Framework\TestCase
     protected $gitIgnore;
     protected $root;
 
-    public function setUp()
+    public function setUp(): void
     {
         $this->gitIgnore = $this->getMockBuilder('AydinHassan\MagentoCoreComposerInstaller\GitIgnore')
             ->disableOriginalConstructor()

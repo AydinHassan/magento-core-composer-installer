@@ -18,7 +18,7 @@ class OptionsTest extends \PHPUnit\Framework\TestCase
         $this->assertTrue($options->appendToGitIgnore());
         $this->assertSame("", $options->getMagentoRootDir());
         $this->assertSame(array(".git", 'composer.lock', 'composer.json'), $options->getDeployExcludes());
-        $this->assertInternalType('array', $options->getIgnoreDirectories());
+        $this->assertIsArray($options->getIgnoreDirectories());
     }
 
     public function testExceptionIsThrownIfMagentoRootDirIsNotSet()
