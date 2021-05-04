@@ -4,34 +4,32 @@ namespace AydinHassan\MagentoCoreComposerInstallerTest;
 
 use AydinHassan\MagentoCoreComposerInstaller\CoreInstaller;
 use AydinHassan\MagentoCoreComposerInstaller\Exclude;
+use AydinHassan\MagentoCoreComposerInstaller\GitIgnore;
 use Composer\Util\Filesystem;
 use org\bovigo\vfs\vfsStream;
+use org\bovigo\vfs\vfsStreamDirectory;
+use PHPUnit\Framework\TestCase;
 
-/**
- * Class CoreInstallerTest
- * @package AydinHassan\MagentoCoreComposerInstallerTest
- * @author Aydin Hassan <aydin@hotmail.co.uk>
- */
-class CoreInstallerTest extends \PHPUnit\Framework\TestCase
+class CoreInstallerTest extends TestCase
 {
-    protected $installer;
-    protected $gitIgnore;
-    protected $root;
+    private CoreInstaller $installer;
+    private GitIgnore $gitIgnore;
+    private vfsStreamDirectory $root;
 
     public function setUp(): void
     {
-        $this->gitIgnore = $this->getMockBuilder('AydinHassan\MagentoCoreComposerInstaller\GitIgnore')
+        $this->gitIgnore = $this->getMockBuilder(GitIgnore::class)
             ->disableOriginalConstructor()
-            ->setMethods(array('addEntry', 'removeEntry', 'removeIgnoreDirectories', '__destruct'))
+            ->onlyMethods(['addEntry', 'removeEntry', 'removeIgnoreDirectories', '__destruct'])
             ->getMock();
 
-        $this->installer = new CoreInstaller(new Exclude('/src/path'), $this->gitIgnore, new Filesystem);
-        $this->root      = vfsStream::setup('root', null, array('source' => array(), 'destination' => array()));
+        $this->installer = new CoreInstaller(new Exclude('/src/path'), $this->gitIgnore, new Filesystem());
+        $this->root = vfsStream::setup('root', null, array('source' => array(), 'destination' => array()));
     }
 
-    public function testInstallerCopiesAllFilesAndAppendsToGitIgnore()
+    public function testInstallerCopiesAllFilesAndAppendsToGitIgnore(): void
     {
-        $this->installer = new CoreInstaller(new Exclude('/src/path'), $this->gitIgnore, new Filesystem);
+        $this->installer = new CoreInstaller(new Exclude('/src/path'), $this->gitIgnore, new Filesystem());
 
         $source = $this->root->getChild('source');
         vfsStream::newFile('file1.txt')->at($source);
@@ -41,25 +39,17 @@ class CoreInstallerTest extends \PHPUnit\Framework\TestCase
         vfsStream::newDirectory('folder2')->at($source->getChild('folder1'));
         vfsStream::newFile('file4.txt')->at($source->getChild('folder1/folder2'));
 
-        $this->gitIgnore
-            ->expects($this->at(0))
-            ->method('addEntry')
-            ->with('/file1.txt');
 
         $this->gitIgnore
-            ->expects($this->at(1))
+            ->expects($this->exactly(4))
             ->method('addEntry')
-            ->with('/folder1/file2.txt');
+            ->withConsecutive(
+                ['/file1.txt'],
+                ['/folder1/file2.txt'],
+                ['/folder1/file3.txt'],
+                ['/folder1/folder2/file4.txt']
+            );
 
-        $this->gitIgnore
-            ->expects($this->at(2))
-            ->method('addEntry')
-            ->with('/folder1/file3.txt');
-
-        $this->gitIgnore
-            ->expects($this->at(3))
-            ->method('addEntry')
-            ->with('/folder1/folder2/file4.txt');
 
         $this->installer->install(vfsStream::url('root/source'), vfsStream::url('root/destination'));
 
@@ -69,9 +59,9 @@ class CoreInstallerTest extends \PHPUnit\Framework\TestCase
         $this->assertTrue($this->root->hasChild('destination/folder1/folder2/file4.txt'));
     }
 
-    public function testIfFolderExistsInDestinationItemIsSkipped()
+    public function testIfFolderExistsInDestinationItemIsSkipped(): void
     {
-        $this->installer = new CoreInstaller(new Exclude('/src/path'), $this->gitIgnore, new Filesystem);
+        $this->installer = new CoreInstaller(new Exclude('/src/path'), $this->gitIgnore, new Filesystem());
 
         vfsStream::newDirectory('folder1')->at($this->root->getChild('source'));
         vfsStream::newDirectory('folder1')->at($this->root->getChild('destination'));
@@ -82,7 +72,7 @@ class CoreInstallerTest extends \PHPUnit\Framework\TestCase
         $this->assertTrue($this->root->hasChild('destination/folder1/file1.txt'));
     }
 
-    public function testIfBrokenSymlinkExistsWhereDirShouldBeExceptionIsThrown()
+    public function testIfBrokenSymlinkExistsWhereDirShouldBeExceptionIsThrown(): void
     {
         $tempSourceDir      = sprintf('%s/%s/source', sys_get_temp_dir(), $this->getName());
         $tempDestinationDir = sprintf('%s/%s/destination', sys_get_temp_dir(), $this->getName());
@@ -113,10 +103,10 @@ class CoreInstallerTest extends \PHPUnit\Framework\TestCase
         rmdir($tempDestinationDir);
     }
 
-    public function testExcludedFilesAreNotCopied()
+    public function testExcludedFilesAreNotCopied(): void
     {
         $exclude = new Exclude(('/src/path'), array('file1.txt', 'folder1/file2.txt'));
-        $this->installer = new CoreInstaller($exclude, $this->gitIgnore, new Filesystem);
+        $this->installer = new CoreInstaller($exclude, $this->gitIgnore, new Filesystem());
 
         $source = $this->root->getChild('source');
         vfsStream::newFile('file1.txt')->at($source);
@@ -137,7 +127,7 @@ class CoreInstallerTest extends \PHPUnit\Framework\TestCase
     /**
      * Create a directory structure for us to work on
      */
-    private function createDirStructureForUnInstaller()
+    private function createDirStructureForUnInstaller(): void
     {
         vfsStream::newFile('file1.txt')->at($this->root->getChild('source'));
         vfsStream::newFile('file1.txt')->at($this->root->getChild('destination'));
@@ -149,21 +139,15 @@ class CoreInstallerTest extends \PHPUnit\Framework\TestCase
         vfsStream::newFile('file3.txt')->at($this->root->getChild('destination/folder1'));
     }
 
-    public function testUninstallRemovesAllFilesWhichExistInSourceAndRemovesEntriesFromGitIgnore()
+    public function testUninstallRemovesAllFilesWhichExistInSourceAndRemovesEntriesFromGitIgnore(): void
     {
         $this->createDirStructureForUnInstaller();
+
         $this->gitIgnore
-            ->expects($this->at(0))
+            ->expects($this->exactly(3))
             ->method('removeEntry')
-            ->with('/file1.txt');
-        $this->gitIgnore
-            ->expects($this->at(1))
-            ->method('removeEntry')
-            ->with('/file2.txt');
-        $this->gitIgnore
-            ->expects($this->at(2))
-            ->method('removeEntry')
-            ->with('/folder1/file3.txt');
+            ->withConsecutive(['/file1.txt'], ['/file2.txt'], ['/folder1/file3.txt']);
+
         $this->gitIgnore
             ->expects($this->once())
             ->method('removeIgnoreDirectories');
@@ -174,7 +158,7 @@ class CoreInstallerTest extends \PHPUnit\Framework\TestCase
         $this->assertEmpty($this->gitIgnore->getEntries());
     }
 
-    public function testUninstallKeepsFoldersWhichOnlyExistInDestination()
+    public function testUninstallKeepsFoldersWhichOnlyExistInDestination(): void
     {
         $this->createDirStructureForUnInstaller();
         vfsStream::newFile('file4.txt')->at($this->root->getChild('destination/folder1'));
@@ -185,7 +169,7 @@ class CoreInstallerTest extends \PHPUnit\Framework\TestCase
         $this->assertFalse($this->root->hasChild('destination/folder1/file3.txt'));
     }
 
-    public function testFileIsSkippedIfItDoesNotExistInDestination()
+    public function testFileIsSkippedIfItDoesNotExistInDestination(): void
     {
         $this->createDirStructureForUnInstaller();
         vfsStream::newFile('file4')->at($this->root->getChild('source'));
@@ -196,13 +180,13 @@ class CoreInstallerTest extends \PHPUnit\Framework\TestCase
         $this->assertFalse($this->root->hasChild('destination/folder1/file3.txt'));
     }
 
-    public function testExcludedFilesAreNotRemovedFromDestination()
+    public function testExcludedFilesAreNotRemovedFromDestination(): void
     {
         $this->createDirStructureForUnInstaller();
         $this->installer = new CoreInstaller(
             new Exclude('/src/path', array('file1.txt', 'folder1/file3.txt')),
             $this->gitIgnore,
-            new Filesystem
+            new Filesystem()
         );
         $this->installer->unInstall(vfsStream::url('root/source'), vfsStream::url('root/destination'));
         $this->assertTrue($this->root->hasChild('destination/file1.txt'));

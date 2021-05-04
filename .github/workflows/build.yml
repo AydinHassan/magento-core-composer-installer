@@ -11,7 +11,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        php: [7.3, 7.4, 8.0]
+        php: [8.0]
 
     name: PHP ${{ matrix.php }}
     steps:
@@ -33,6 +33,4 @@ jobs:
           vendor/bin/phpunit --coverage-clover ./build/logs/clover.xml
 
       - name: Run phpcs
-        run: |
-          vendor/bin/phpcs --standard=PSR2 ./src/
-          vendor/bin/phpcs --standard=PSR2 ./test/
+        run: composer cs
