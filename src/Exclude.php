@@ -40,7 +40,6 @@ class Exclude
     public function exclude($filePath)
     {
         foreach ($this->excludes as $exclude) {
-
             if ($this->isExcludeDir($exclude)) {
                 if (substr($filePath, 0, strlen($exclude)) === $exclude) {
                     return true;

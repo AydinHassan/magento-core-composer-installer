@@ -50,7 +50,6 @@ class CoreInstaller
     {
         $iterator = $this->getIterator($source, RecursiveIteratorIterator::SELF_FIRST);
         foreach ($iterator as $item) {
-
             $destinationFile = sprintf("%s/%s", $destination, $iterator->getSubPathName());
             $filePath        = $iterator->getSubPathName();
 
@@ -105,7 +104,6 @@ class CoreInstaller
                 //check if there are not other files in this dir
                 if ($this->fileSystem->isDirEmpty($destinationFile)) {
                     $this->fileSystem->removeDirectory($destinationFile);
-
                 }
                 continue;
             }
