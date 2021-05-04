@@ -3,50 +3,16 @@
 namespace AydinHassan\MagentoCoreComposerInstaller;
 
 use Composer\Util\Filesystem;
-use ErrorException;
 use RecursiveIteratorIterator;
 use RecursiveDirectoryIterator;
 
-/**
- * Class CoreInstaller
- * @package AydinHassan\MagentoCoreComposerInstaller
- * @author Aydin Hassan <aydin@hotmail.co.uk>
- */
 class CoreInstaller
 {
-
-    /**
-     * @var Exclude
-     */
-    protected $exclude;
-
-    /**
-     * @var GitIgnore
-     */
-    protected $gitIgnore;
-
-    /**
-     * @var Filesystem
-     */
-    protected $fileSystem;
-
-    /**
-     * @param Exclude $exclude
-     * @param GitIgnore $gitIgnore
-     * @param Filesystem $fileSystem
-     */
-    public function __construct(Exclude $exclude, GitIgnore $gitIgnore, Filesystem $fileSystem)
+    public function __construct(private Exclude $exclude, private GitIgnore $gitIgnore, private Filesystem $fileSystem)
     {
-        $this->exclude      = $exclude;
-        $this->gitIgnore    = $gitIgnore;
-        $this->fileSystem   = $fileSystem;
     }
 
-    /**
-     * @param string $source
-     * @param string $destination
-     */
-    public function install($source, $destination)
+    public function install(string $source, string $destination): void
     {
         $iterator = $this->getIterator($source, RecursiveIteratorIterator::SELF_FIRST);
         foreach ($iterator as $item) {
@@ -80,11 +46,7 @@ class CoreInstaller
         }
     }
 
-    /**
-     * @param string $source
-     * @param string $destination
-     */
-    public function unInstall($source, $destination)
+    public function unInstall(string $source, string $destination): void
     {
 
         $iterator = $this->getIterator($source, RecursiveIteratorIterator::CHILD_FIRST);
@@ -115,12 +77,7 @@ class CoreInstaller
         $this->gitIgnore->removeIgnoreDirectories();
     }
 
-    /**
-     * @param string $source
-     * @param int $flags
-     * @return RecursiveIteratorIterator
-     */
-    public function getIterator($source, $flags)
+    public function getIterator(string $source, int $flags): RecursiveIteratorIterator
     {
         return new RecursiveIteratorIterator(
             new RecursiveDirectoryIterator(

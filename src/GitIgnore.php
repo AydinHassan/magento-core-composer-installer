@@ -2,57 +2,26 @@
 
 namespace AydinHassan\MagentoCoreComposerInstaller;
 
-/**
- * Class GitIgnore
- * @package AydinHassan\MagentoCoreComposerInstaller
- * @author Aydin Hassan <aydin@hotmail.co.uk>
- */
 class GitIgnore
 {
+    private array $lines = [];
+    private array $directoriesToIgnoreEntirely = [];
+    private string $gitIgnoreLocation;
+    private bool $hasChanges = false;
+    private bool $gitIgnoreEnabled;
 
-    /**
-     * @var array
-     */
-    protected $lines = array();
-
-    /**
-     * @var array
-     */
-    protected $directoriesToIgnoreEntirely = array();
-
-    /**
-     * @var string|null
-     */
-    protected $gitIgnoreLocation;
-
-    /**
-     * @var bool
-     */
-    protected $hasChanges = false;
-
-    /**
-     * @var bool
-     */
-    protected $gitIgnoreEnabled;
-
-    /**
-     * @param string $fileLocation
-     * @param array $directoriesToIgnoreEntirely
-     * @param bool $gitIgnoreAppend
-     * @param bool $gitIgnoreEnabled
-     */
     public function __construct(
-        $fileLocation,
+        string $gitIgnoreLocation,
         array $directoriesToIgnoreEntirely,
-        $gitIgnoreAppend = true,
-        $gitIgnoreEnabled = true
+        bool $gitIgnoreAppend = true,
+        bool $gitIgnoreEnabled = true
     ) {
-        $this->gitIgnoreLocation = $fileLocation;
+        $this->gitIgnoreLocation = $gitIgnoreLocation;
 
         $this->gitIgnoreEnabled = $gitIgnoreEnabled;
 
-        if (file_exists($fileLocation) && $gitIgnoreAppend) {
-            $this->lines = explode("\n", file_get_contents($fileLocation));
+        if (file_exists($gitIgnoreLocation) && $gitIgnoreAppend) {
+            $this->lines = explode("\n", file_get_contents($gitIgnoreLocation));
         }
 
         $this->directoriesToIgnoreEntirely = $directoriesToIgnoreEntirely;
@@ -60,14 +29,11 @@ class GitIgnore
         $this->addEntriesForDirectoriesToIgnoreEntirely();
     }
 
-    /**
-     * @param string $file
-     */
-    public function addEntry($file)
+    public function addEntry(string $file): void
     {
         $addToGitIgnore = true;
         foreach ($this->directoriesToIgnoreEntirely as $directory) {
-            if (substr($file, 0, strlen($directory)) === $directory) {
+            if (str_starts_with($file, $directory)) {
                 $addToGitIgnore = false;
             }
         }
@@ -79,10 +45,7 @@ class GitIgnore
         $this->hasChanges = true;
     }
 
-    /**
-     * @param string $file
-     */
-    public function removeEntry($file)
+    public function removeEntry(string $file): void
     {
         $index = array_search($file, $this->lines);
 
@@ -92,30 +55,21 @@ class GitIgnore
         }
     }
 
-    /**
-     * Remove all the directories to ignore
-     */
-    public function removeIgnoreDirectories()
+    public function removeIgnoreDirectories(): void
     {
         foreach ($this->directoriesToIgnoreEntirely as $directory) {
             $this->removeEntry($directory);
         }
     }
 
-    /**
-     * @return array
-     */
-    public function getEntries()
+    public function getEntries(): array
     {
         return array_values($this->lines);
     }
 
-    /**
-     * Wipe out the gitginore
-     */
-    public function wipeOut()
+    public function wipeOut(): void
     {
-        $this->lines = array();
+        $this->lines = [];
         $this->hasChanges = true;
     }
 
@@ -132,7 +86,7 @@ class GitIgnore
     /**
      * Add entries to for all directories ignored entirely.
      */
-    protected function addEntriesForDirectoriesToIgnoreEntirely()
+    private function addEntriesForDirectoriesToIgnoreEntirely(): void
     {
         foreach ($this->directoriesToIgnoreEntirely as $directory) {
             if (!in_array($directory, $this->lines)) {

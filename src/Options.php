@@ -2,28 +2,23 @@
 
 namespace AydinHassan\MagentoCoreComposerInstaller;
 
-/**
- * Class Options
- * @package AydinHassan\MagentoCoreComposerInstaller
- * @author Aydin Hassan <aydin@hotmail.co.uk>
- */
 class Options
 {
     /**
-     * @var array Any path which start with any of these
+     * Any path which start with any of these
      * entries should be ignored
      */
-    protected $deployExcludes = array(
+    private array $deployExcludes = [
         ".git",
         "composer.lock",
         "composer.json",
-    );
+    ];
 
     /**
-     * @var array Directories to ignore
+     * Directories to ignore
      * to reduce the size of the git ignore
      */
-    protected $ignoreDirectories = array(
+    private array $ignoreDirectories = [
         '/app/code/core/Mage',
         '/app/code/core/Zend',
         '/app/code/core/Enterprise',
@@ -108,43 +103,32 @@ class Options
         '/skin/frontend/base/default/images/cookies',
         '/skin/frontend/base/default/images/xmlconnect',
         '/app/design/frontend/default/modern/template/catalogsearch'
-    );
+    ];
 
     /**
      * Whether to append to the existing git ignore or remove it
      * and start fresh
-     *
-     * @var bool
      */
-    protected $appendToGitIgnore = true;
+    private bool $appendToGitIgnore = true;
 
     /**
      * Whether the git ignore functionality is enabled
-     *
-     * @var bool
      */
-    protected $gitIgnoreFunctionalityEnabled = true;
+    private bool $gitIgnoreFunctionalityEnabled = true;
 
     /**
      * Magento Root Directory
-     *
-     * @var string
      */
-    protected $magentoRootDir;
+    private string $magentoRootDir;
 
     /**
      * Name of Magento Core Package
-     *
-     * @var string
      */
-    protected $magentoCorePackageType = 'magento-core';
+    private string $magentoCorePackageType = 'magento-core';
 
-    /**
-     * @param array $packageExtra
-     */
     public function __construct(array $packageExtra)
     {
-        $coreInstallerOptions = array();
+        $coreInstallerOptions = [];
         if (isset($packageExtra['magento-core-deploy']) && is_array($packageExtra['magento-core-deploy'])) {
             $coreInstallerOptions = $packageExtra['magento-core-deploy'];
         }
@@ -184,50 +168,32 @@ class Options
         $this->magentoRootDir = rtrim($packageExtra['magento-root-dir'], "/");
     }
 
-    /**
-     * @return array
-     */
-    public function getDeployExcludes()
+    public function getDeployExcludes(): array
     {
         return $this->deployExcludes;
     }
 
-    /**
-     * @return array
-     */
-    public function getIgnoreDirectories()
+    public function getIgnoreDirectories(): array
     {
         return $this->ignoreDirectories;
     }
 
-    /**
-     * @return bool
-     */
-    public function gitIgnoreFunctionalityEnabled()
+    public function gitIgnoreFunctionalityEnabled(): bool
     {
         return $this->gitIgnoreFunctionalityEnabled;
     }
 
-    /**
-     * @return boolean
-     */
-    public function appendToGitIgnore()
+    public function appendToGitIgnore(): bool
     {
         return $this->appendToGitIgnore;
     }
 
-    /**
-     * @return string
-     */
-    public function getMagentoRootDir()
+    public function getMagentoRootDir(): string
     {
         return $this->magentoRootDir;
     }
 
-    /**
-     * @return string
-     */
-    public function getMagentoCorePackageType()
+    public function getMagentoCorePackageType(): string
     {
         return $this->magentoCorePackageType;
     }

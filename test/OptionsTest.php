@@ -3,97 +3,89 @@
 namespace AydinHassan\MagentoCoreComposerInstallerTest;
 
 use AydinHassan\MagentoCoreComposerInstaller\Options;
+use PHPUnit\Framework\TestCase;
 
-/**
- * Class OptionsTest
- * @package AydinHassan\MagentoCoreComposerInstallerTest
- * @author Aydin Hassan <aydin@hotmail.co.uk>
- */
-class OptionsTest extends \PHPUnit\Framework\TestCase
+class OptionsTest extends TestCase
 {
-    public function testDefaults()
+    public function testDefaults(): void
     {
-        $options = new Options(array('magento-root-dir' => '/'));
+        $options = new Options(['magento-root-dir' => '/']);
 
         $this->assertTrue($options->appendToGitIgnore());
         $this->assertSame("", $options->getMagentoRootDir());
-        $this->assertSame(array(".git", 'composer.lock', 'composer.json'), $options->getDeployExcludes());
+        $this->assertSame([".git", 'composer.lock', 'composer.json'], $options->getDeployExcludes());
         $this->assertIsArray($options->getIgnoreDirectories());
     }
 
-    public function testExceptionIsThrownIfMagentoRootDirIsNotSet()
+    public function testExceptionIsThrownIfMagentoRootDirIsNotSet(): void
     {
         $this->expectException('InvalidArgumentException');
         $this->expectExceptionMessage('magento-root-dir must be specified in root package');
-        new Options(array());
+        new Options([]);
     }
 
-    public function testExcludesMergesWithExistingExcludes()
+    public function testExcludesMergesWithExistingExcludes(): void
     {
-        $options = new Options(array(
-            'magento-root-dir'      => '/',
-            'magento-core-deploy'   => array(
-                'excludes' => array(
+        $options = new Options([
+            'magento-root-dir' => '/',
+            'magento-core-deploy' => [
+                'excludes' => [
                     'excludeme'
-                )
-            ),
-        ));
+                ]
+            ],
+        ]);
 
-        $this->assertSame(array('.git', 'composer.lock', 'composer.json', 'excludeme'), $options->getDeployExcludes());
+        $this->assertSame(['.git', 'composer.lock', 'composer.json', 'excludeme'], $options->getDeployExcludes());
     }
 
-    public function testExceptionIsThrownIfExcludesIsNotAnArray()
+    public function testExceptionIsThrownIfExcludesIsNotAnArray(): void
     {
-        $this->expectException(
-            'InvalidArgumentException'
-        );
+        $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage('excludes must be an array of files/directories to ignore');
 
-        new Options(array(
-            'magento-root-dir'      => '/',
-            'magento-core-deploy'   => array(
-                'excludes' => new \stdClass,
-            ),
-        ));
+        new Options([
+            'magento-root-dir' => '/',
+            'magento-core-deploy' => [
+                'excludes' => new \stdClass(),
+            ],
+        ]);
     }
 
-    public function testIgnoreDirsOverwritesExistingIgnoreDirs()
+    public function testIgnoreDirsOverwritesExistingIgnoreDirs(): void
     {
-        $options = new Options(array(
-            'magento-root-dir'      => '/',
-            'magento-core-deploy'   => array(
-                'ignore-directories' => array(
+        $options = new Options([
+            'magento-root-dir' => '/',
+            'magento-core-deploy' => [
+                'ignore-directories' => [
                     'ignoreme'
-                )
-            ),
-        ));
+                ]
+            ],
+        ]);
 
-        $this->assertSame(array('ignoreme'), $options->getIgnoreDirectories());
+        $this->assertSame(['ignoreme'], $options->getIgnoreDirectories());
     }
 
-    public function testExceptionIsThrownIfIgnoreDirsIsNotAnArray()
+    public function testExceptionIsThrownIfIgnoreDirsIsNotAnArray(): void
     {
-        $this->expectException(
-            'InvalidArgumentException'
-        );
+        $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage('ignore-directories must be an array of files/directories');
 
-        new Options(array(
-            'magento-root-dir'      => '/',
-            'magento-core-deploy'   => array(
-                'ignore-directories' => new \stdClass,
-            ),
-        ));
+        new Options([
+            'magento-root-dir' => '/',
+            'magento-core-deploy' => [
+                'ignore-directories' => new \stdClass(),
+            ],
+        ]);
     }
 
-    public function testGitIgnoreAppendFlag()
+    public function testGitIgnoreAppendFlag(): void
     {
-        $options = new Options(array(
-            'magento-root-dir'      => '/',
-            'magento-core-deploy'   => array(
+        $options = new Options([
+            'magento-root-dir' => '/',
+            'magento-core-deploy' => [
                 'git-ignore-append' => true,
-            ),
-        ));
+            ],
+        ]);
 
         $this->assertTrue($options->appendToGitIgnore());
     }

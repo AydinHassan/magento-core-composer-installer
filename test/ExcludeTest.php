@@ -3,55 +3,44 @@
 namespace AydinHassan\MagentoCoreComposerInstallerTest;
 
 use AydinHassan\MagentoCoreComposerInstaller\Exclude;
-use AydinHassan\MagentoCoreComposerInstaller\Options;
+use PHPUnit\Framework\TestCase;
 
-/**
- * Class ExcludeTest
- * @package AydinHassan\MagentoCoreComposerInstallerTest
- * @author Aydin Hassan <aydin@hotmail.co.uk>
- */
-class ExcludeTest extends \PHPUnit\Framework\TestCase
+class ExcludeTest extends TestCase
 {
-
     /**
-     * @param string $file
-     * @param bool $expectedResult
      * @dataProvider filePathProvider
      */
-    public function testFilesAreCorrectlyExcluded($file, $expectedResult)
+    public function testFilesAreCorrectlyExcluded(string $file, bool $expectedResult): void
     {
         $exclude = new Exclude(
             '/src/path',
-            array(
+            [
                 'file1.txt',
                 'file2.txt',
                 'folder1/file3.txt',
                 'folder1/file2.txt',
-            )
+            ]
         );
 
         $this->assertSame($exclude->exclude($file), $expectedResult);
     }
 
-    /**
-     * @return array
-     */
-    public function filePathProvider()
+    public function filePathProvider(): array
     {
-        return array(
-            array('file1.txt', true),
-            array('file2.txt', true),
-            array('folder1/file3.txt', true),
-            array('folder1/file2.txt', true),
-            array('folder1/file1.txt', false),
-            array('folder1/file4.txt', false),
-            array('file3.txt', false),
-            array('file2.txt.bak', false),
-        );
+        return [
+            ['file1.txt', true],
+            ['file2.txt', true],
+            ['folder1/file3.txt', true],
+            ['folder1/file2.txt', true],
+            ['folder1/file1.txt', false],
+            ['folder1/file4.txt', false],
+            ['file3.txt', false],
+            ['file2.txt.bak', false],
+        ];
     }
 
 
-    public function testSubDirectoriesOfExcludeAreAlsoExcluded()
+    public function testSubDirectoriesOfExcludeAreAlsoExcluded(): void
     {
         $sourcePath = sprintf('%s/%s', sys_get_temp_dir(), $this->getName());
         @mkdir($sourcePath, 0775, true);
@@ -59,9 +48,7 @@ class ExcludeTest extends \PHPUnit\Framework\TestCase
 
         $exclude = new Exclude(
             $sourcePath,
-            array(
-                'folder1',
-            )
+            ['folder1']
         );
 
         $this->assertTrue($exclude->exclude('folder1/file1.txt'));
@@ -72,13 +59,11 @@ class ExcludeTest extends \PHPUnit\Framework\TestCase
         rmdir($sourcePath);
     }
 
-    public function testExcludeFileIsNotGreedy()
+    public function testExcludeFileIsNotGreedy(): void
     {
         $exclude = new Exclude(
             '/src/path',
-            array(
-                'file1.txt',
-            )
+            ['file1.txt',]
         );
 
         $this->assertTrue($exclude->exclude('file1.txt'));

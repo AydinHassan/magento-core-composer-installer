@@ -2,6 +2,7 @@
 
 namespace AydinHassan\MagentoCoreComposerInstallerTest;
 
+use AydinHassan\MagentoCoreComposerInstaller\CoreInstaller;
 use AydinHassan\MagentoCoreComposerInstaller\CoreManager;
 use AydinHassan\MagentoCoreComposerInstaller\Options;
 use Composer\Composer;
@@ -9,34 +10,31 @@ use Composer\Config;
 use Composer\DependencyResolver\Operation\InstallOperation;
 use Composer\DependencyResolver\Operation\UninstallOperation;
 use Composer\DependencyResolver\Operation\UpdateOperation;
+use Composer\DependencyResolver\PolicyInterface;
 use Composer\DependencyResolver\Transaction;
 use Composer\Installer\InstallerEvent;
-use Composer\Plugin\PrePoolCreateEvent;
-use Composer\Plugin\PluginEvents;
+use Composer\IO\IOInterface;
 use Composer\Package\Package;
 use Composer\Package\RootPackage;
+use Composer\Repository\ArrayRepository;
 use Composer\Repository\CompositeRepository;
 use Composer\Repository\RepositoryManager;
 use Composer\Repository\InstalledArrayRepository;
 use Composer\Installer\PackageEvent;
 use Composer\Util\Filesystem;
 use Composer\Util\HttpDownloader;
+use PHPUnit\Framework\MockObject\MockObject;
 
-/**
- * Class CoreManagerTest
- * @package AydinHassan\MagentoCoreComposerInstallerTest
- * @author Aydin Hassan <aydin@hotmail.co.uk>
- */
 class CoreManagerTest extends \PHPUnit\Framework\TestCase
 {
-    protected $composer;
-    protected $config;
-    protected $io;
-    protected $repoManager;
-    protected $localRepository;
-    protected $plugin;
-    protected $tmpDir;
-    protected $httpDownloader;
+    private Composer $composer;
+    private Config $config;
+    private IOInterface $io;
+    private RepositoryManager $repoManager;
+    private InstalledArrayRepository $localRepository;
+    private CoreManager $plugin;
+    private string $tmpDir;
+    private HttpDownloader $httpDownloader;
 
     public function setUp(): void
     {
@@ -47,41 +45,41 @@ class CoreManagerTest extends \PHPUnit\Framework\TestCase
         $this->tmpDir = sprintf("%s/magento-core-composer-installer", realpath(sys_get_temp_dir()));
 
 
-        $this->config->merge(array(
-            'config' => array(
-                'vendor-dir'    => $this->tmpDir . "/vendor",
-            ),
-        ));
+        $this->config->merge([
+            'config' => [
+                'vendor-dir' => $this->tmpDir . "/vendor",
+            ],
+        ]);
 
-        $this->io = $this->createMock('Composer\IO\IOInterface');
+        $this->io = $this->createMock(IOInterface::class);
         $this->httpDownloader = new HttpDownloader($this->io, $this->config);
         $this->repoManager = new RepositoryManager($this->io, $this->config, $this->httpDownloader);
 
         $this->composer->setRepositoryManager($this->repoManager);
         $this->localRepository = new InstalledArrayRepository();
         $this->repoManager->setLocalRepository($this->localRepository);
-        $this->plugin = new CoreManager;
+        $this->plugin = new CoreManager();
         $this->plugin->activate($this->composer, $this->io);
     }
 
-    public function testGetSubscribedEvents()
+    public function testGetSubscribedEvents(): void
     {
         $events = CoreManager::getSubscribedEvents();
-        $expected = array (
-            'pre-operations-exec'           => array(array('checkCoreDependencies', 0)),
-            'post-package-install'      => array(array('installCore', 0)),
-            'pre-package-update'        => array(array('uninstallCore', 0)),
-            'post-package-update'       => array(array('installCore', 0)),
-            'pre-package-uninstall'     => array(array('uninstallCore', 0))
-        );
+        $expected = [
+            'pre-operations-exec' => [['checkCoreDependencies', 0]],
+            'post-package-install' => [['installCore', 0]],
+            'pre-package-update' => [['uninstallCore', 0]],
+            'post-package-update' => [['installCore', 0]],
+            'pre-package-uninstall' => [['uninstallCore', 0]]
+        ];
 
         $this->assertEquals($expected, $events);
     }
 
-    public function testCheckCoreDependenciesThrowsExceptionIfMoreThan2CorePackagesRequired()
+    public function testCheckCoreDependenciesThrowsExceptionIfMoreThan2CorePackagesRequired(): void
     {
         $rootPackage = new RootPackage('some/project', '1.0.0', 'some/project');
-        $rootPackage->setExtra(array('magento-root-dir' => 'htdocs'));
+        $rootPackage->setExtra(['magento-root-dir' => 'htdocs']);
         $this->composer->setPackage($rootPackage);
 
         $this->localRepository->addPackage($this->createCorePackage());
@@ -104,7 +102,7 @@ class CoreManagerTest extends \PHPUnit\Framework\TestCase
             $this->composer,
             $this->io,
             false,
-            $this->createMock('Composer\DependencyResolver\PolicyInterface'),
+            $this->createMock(PolicyInterface::class),
             $transaction
         );
 
@@ -116,10 +114,10 @@ class CoreManagerTest extends \PHPUnit\Framework\TestCase
     /**
      * @doesNotPerformAssertions
      */
-    public function testCheckCoreDependenciesIsSuccessfulWith1CorePackage()
+    public function testCheckCoreDependenciesIsSuccessfulWith1CorePackage(): void
     {
         $rootPackage = new RootPackage('some/project', '1.0.0', 'some/project');
-        $rootPackage->setExtra(array('magento-root-dir' => 'htdocs'));
+        $rootPackage->setExtra(['magento-root-dir' => 'htdocs']);
         $this->composer->setPackage($rootPackage);
 
         $this->localRepository->addPackage($this->createCorePackage());
@@ -145,14 +143,14 @@ class CoreManagerTest extends \PHPUnit\Framework\TestCase
         $this->plugin->checkCoreDependencies($installerEvent);
     }
 
-    public function testCheckCoreDependenciesThrowsExceptionWhenASecondCorePackageIsRequired()
+    public function testCheckCoreDependenciesThrowsExceptionWhenASecondCorePackageIsRequired(): void
     {
         $rootPackage = new RootPackage('some/project', '1.0.0', 'some/project');
-        $rootPackage->setExtra(array('magento-root-dir' => 'htdocs'));
+        $rootPackage->setExtra(['magento-root-dir' => 'htdocs']);
         $this->composer->setPackage($rootPackage);
 
-        $corePackage1   = $this->createCorePackage();
-        $corePackage2   = $this->createCorePackage('magento/core2-package');
+        $corePackage1 = $this->createCorePackage();
+        $corePackage2 = $this->createCorePackage('magento/core2-package');
         $this->localRepository->addPackage($corePackage1);
         $this->localRepository->addPackage($corePackage2);
         $this->localRepository->addPackage($corePackage2);
@@ -171,7 +169,7 @@ class CoreManagerTest extends \PHPUnit\Framework\TestCase
             $this->composer,
             $this->io,
             false,
-            $this->createMock('Composer\DependencyResolver\PolicyInterface'),
+            $this->createMock(PolicyInterface::class),
             $transaction
         );
 
@@ -183,16 +181,14 @@ class CoreManagerTest extends \PHPUnit\Framework\TestCase
     /**
      * @doesNotPerformAssertions
      */
-    public function testCheckCoreDependenciesIsSuccesfulWhenRemoving1CorePackageAndAddingAnother()
+    public function testCheckCoreDependenciesIsSuccessfulWhenRemoving1CorePackageAndAddingAnother(): void
     {
         $rootPackage = new RootPackage('some/project', '1.0.0', 'some/project');
-        $rootPackage->setExtra(array('magento-root-dir' => 'htdocs'));
+        $rootPackage->setExtra(['magento-root-dir' => 'htdocs']);
         $this->composer->setPackage($rootPackage);
 
-        $corePackage1   = $this->createCorePackage();
-        $corePackage2   = $this->createCorePackage('magento/core2-package');
-        $installOp      = new InstallOperation($corePackage2);
-        $unInstallOp    = new UninstallOperation($corePackage1);
+        $corePackage1 = $this->createCorePackage();
+        $corePackage2 = $this->createCorePackage('magento/core2-package');
         $this->localRepository->addPackage($corePackage1);
 
         $presentPackages = [];
@@ -207,20 +203,17 @@ class CoreManagerTest extends \PHPUnit\Framework\TestCase
             $this->composer,
             $this->io,
             false,
-            $this->createMock('Composer\DependencyResolver\PolicyInterface'),
+            $this->createMock(PolicyInterface::class),
             $transaction
         );
 
         $this->plugin->checkCoreDependencies($installerEvent);
     }
 
-    /**
-     * @doesNotPerformAssertions
-     */
-    public function testInstallCoreFromInstallOperation()
+    public function testInstallCoreFromInstallOperation(): void
     {
         $rootPackage = new RootPackage('some/project', '1.0.0', 'some/project');
-        $rootPackage->setExtra(array('magento-root-dir' => 'htdocs'));
+        $rootPackage->setExtra(['magento-root-dir' => 'htdocs']);
         $this->composer->setPackage($rootPackage);
 
         $corePackage = $this->createCorePackage();
@@ -250,21 +243,16 @@ class CoreManagerTest extends \PHPUnit\Framework\TestCase
         $plugin->installCore($event);
     }
 
-    public function testInstallCoreFromInstallOperationCreateRootDirectoryIfItDoesNotExist()
+    public function testInstallCoreFromInstallOperationCreateRootDirectoryIfItDoesNotExist(): void
     {
 
         $corePackage = $this->createCorePackage();
 
         $rootPackage = new RootPackage('some/project', '1.0.0', 'some/project');
-        $rootPackage->setExtra(array('magento-root-dir' => 'htdocs'));
+        $rootPackage->setExtra(['magento-root-dir' => 'htdocs']);
         $this->composer->setPackage($rootPackage);
 
-        $pool = $this->createMock('Composer\DependencyResolver\Pool');
-
-        $request = $this->createMock('Composer\DependencyResolver\Request');
-
-
-        $compositeRepo = new CompositeRepository(array($this->localRepository));
+        $compositeRepo = new CompositeRepository([$this->localRepository]);
 
         $event = new PackageEvent(
             'install-event',
@@ -272,7 +260,7 @@ class CoreManagerTest extends \PHPUnit\Framework\TestCase
             $this->io,
             false,
             $compositeRepo,
-            array(),
+            [],
             new InstallOperation($corePackage)
         );
 
@@ -285,25 +273,22 @@ class CoreManagerTest extends \PHPUnit\Framework\TestCase
             ->method('write')
             ->with($l);
 
-        $this->assertFileNotExists('htdocs');
+        $this->assertFileDoesNotExist('htdocs');
 
         $plugin->activate($this->composer, $this->io);
         $plugin->installCore($event);
         $this->assertFileExists('htdocs');
     }
 
-    /**
-     * @doesNotPerformAssertions
-     */
-    public function testInstallCoreFromUpdateOperation()
+    public function testInstallCoreFromUpdateOperation(): void
     {
         $corePackage = $this->createCorePackage();
 
         $rootPackage = new RootPackage('some/project', '1.0.0', 'some/project');
-        $rootPackage->setExtra(array('magento-root-dir' => 'htdocs'));
+        $rootPackage->setExtra(['magento-root-dir' => 'htdocs']);
         $this->composer->setPackage($rootPackage);
 
-        $compositeRepo = new CompositeRepository(array($this->localRepository));
+        $compositeRepo = new CompositeRepository([$this->localRepository]);
 
         $event = new PackageEvent(
             'install-event',
@@ -311,7 +296,7 @@ class CoreManagerTest extends \PHPUnit\Framework\TestCase
             $this->io,
             false,
             $compositeRepo,
-            array(),
+            [],
             new UpdateOperation($this->createCorePackage('magento/initial'), $corePackage)
         );
 
@@ -328,18 +313,15 @@ class CoreManagerTest extends \PHPUnit\Framework\TestCase
         $plugin->installCore($event);
     }
 
-    /**
-     * @doesNotPerformAssertions
-     */
-    public function testUnInstallCoreFromUnInstallOperation()
+    public function testUnInstallCoreFromUnInstallOperation(): void
     {
         $corePackage = $this->createCorePackage();
 
         $rootPackage = new RootPackage('some/project', '1.0.0', 'some/project');
-        $rootPackage->setExtra(array('magento-root-dir' => 'htdocs'));
+        $rootPackage->setExtra(['magento-root-dir' => 'htdocs']);
         $this->composer->setPackage($rootPackage);
 
-        $compositeRepo = new CompositeRepository(array($this->localRepository));
+        $compositeRepo = new CompositeRepository([$this->localRepository]);
 
         $event = new PackageEvent(
             'install-event',
@@ -347,7 +329,7 @@ class CoreManagerTest extends \PHPUnit\Framework\TestCase
             $this->io,
             false,
             $compositeRepo,
-            array(),
+            [],
             new UninstallOperation($corePackage)
         );
 
@@ -364,18 +346,15 @@ class CoreManagerTest extends \PHPUnit\Framework\TestCase
         $plugin->uninstallCore($event);
     }
 
-    /**
-     * @doesNotPerformAssertions
-     */
-    public function testUnInstallCoreFromUpdateOperation()
+    public function testUnInstallCoreFromUpdateOperation(): void
     {
         $corePackage = $this->createCorePackage();
 
         $rootPackage = new RootPackage('some/project', '1.0.0', 'some/project');
-        $rootPackage->setExtra(array('magento-root-dir' => 'htdocs'));
+        $rootPackage->setExtra(['magento-root-dir' => 'htdocs']);
         $this->composer->setPackage($rootPackage);
 
-        $compositeRepo = new CompositeRepository(array($this->localRepository));
+        $compositeRepo = new CompositeRepository([$this->localRepository]);
 
         $event = new PackageEvent(
             'install-event',
@@ -383,7 +362,7 @@ class CoreManagerTest extends \PHPUnit\Framework\TestCase
             $this->io,
             false,
             $compositeRepo,
-            array(),
+            [],
             new UpdateOperation($corePackage, $this->createCorePackage('magento/target'))
         );
 
@@ -400,7 +379,7 @@ class CoreManagerTest extends \PHPUnit\Framework\TestCase
         $plugin->uninstallCore($event);
     }
 
-    public function testGetInstallPath()
+    public function testGetInstallPath(): void
     {
         $package = $this->createCorePackage();
         $package->setTargetDir('target');
@@ -411,52 +390,48 @@ class CoreManagerTest extends \PHPUnit\Framework\TestCase
         );
     }
 
-    public function getOptions()
+    public function getOptions(): Options
     {
-        return new Options(array(
+        return new Options([
             'magento-root-dir' => $this->tmpDir,
-        ));
+        ]);
     }
 
-    public function createRootPackage()
+    public function createRootPackage(): RootPackage
     {
-        $package = new RootPackage("root/package", "1.0.0", "root/package");
-        return $package;
+        return new RootPackage("root/package", "1.0.0", "root/package");
     }
 
-    public function createCorePackage($name = 'magento/core-package')
+    public function createCorePackage($name = 'magento/core-package'): Package
     {
         $package = new Package($name, "1.0.0", $name);
         $package->setType('magento-core');
         return $package;
     }
 
-    /**
-     * @return \PHPUnit\Framework\MockObject\MockObject
-     */
-    private function getPluginWithMockedInstaller($installerMethod)
+    private function getPluginWithMockedInstaller($installerMethod): MockObject
     {
-        $installer = $this->createMock('AydinHassan\MagentoCoreComposerInstaller\CoreInstaller');
+        $installer = $this->createMock(CoreInstaller::class);
 
         $installer->expects($this->once())
             ->method($installerMethod);
 
-        $plugin = $this->getMockBuilder('AydinHassan\MagentoCoreComposerInstaller\CoreManager')
-            ->setMethods(array('getInstaller'))
+        $plugin = $this->getMockBuilder(CoreManager::class)
+            ->onlyMethods(['getInstaller'])
             ->getMock();
 
         $plugin->expects($this->once())
             ->method('getInstaller')
-            ->with($this->isInstanceOf('AydinHassan\MagentoCoreComposerInstaller\Options'))
+            ->with($this->isInstanceOf(Options::class))
             ->will($this->returnValue($installer));
 
         return $plugin;
     }
 
-    public function testGetInstaller()
+    public function testGetInstaller(): void
     {
         $this->assertInstanceOf(
-            'AydinHassan\MagentoCoreComposerInstaller\CoreInstaller',
+            CoreInstaller::class,
             $this->plugin->getInstaller($this->getOptions(), new Package('some/package', "1.0.0", 'some/package'))
         );
     }
@@ -464,7 +439,7 @@ class CoreManagerTest extends \PHPUnit\Framework\TestCase
     public function tearDown(): void
     {
         if (file_exists('htdocs')) {
-            $fs = new Filesystem;
+            $fs = new Filesystem();
             $fs->remove('htdocs');
         }
     }

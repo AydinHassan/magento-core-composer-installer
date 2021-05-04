@@ -8,7 +8,7 @@
         "composer-plugin-api": "^2.0"
     },
     "require-dev": {
-        "squizlabs/php_codesniffer": "~3.0",
+        "squizlabs/php_codesniffer": "^3.0",
         "composer/composer": "^2.0",
         "phpunit/phpunit": "^9.0",
         "mikey179/vfsstream": "~1.4"
@@ -37,5 +37,15 @@
         "platform": {
             "php": "8.0"
         }
+    },
+    "scripts": {
+        "cs": [
+            "phpcs --standard=PSR12 ./src/",
+            "phpcs --standard=PSR12 ./test/"
+        ],
+        "cs-fix": [
+            "phpcbf --standard=PSR12 ./src/",
+            "phpcbf --standard=PSR12 ./test/"
+        ]
     }
 }
