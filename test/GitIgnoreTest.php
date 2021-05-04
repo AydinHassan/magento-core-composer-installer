@@ -14,7 +14,7 @@ class GitIgnoreTest extends \PHPUnit\Framework\TestCase
 {
     protected $gitIgnoreFile;
 
-    public function setUp()
+    public function setUp(): void
     {
         vfsStream::setup('root');
         $this->gitIgnoreFile = vfsStream::url('root/.gitignore');

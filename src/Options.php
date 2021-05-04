@@ -151,7 +151,6 @@ class Options
 
         //merge excludes from root package composer.json file with default excludes
         if (isset($coreInstallerOptions['excludes'])) {
-
             if (!is_array($coreInstallerOptions['excludes'])) {
                 throw new \InvalidArgumentException("excludes must be an array of files/directories to ignore");
             }
@@ -160,7 +159,6 @@ class Options
 
         //overwrite default ignore directories if some are specified in root package composer.json
         if (isset($coreInstallerOptions['ignore-directories'])) {
-
             if (!is_array($coreInstallerOptions['ignore-directories'])) {
                 throw new \InvalidArgumentException("ignore-directories must be an array of files/directories");
             }

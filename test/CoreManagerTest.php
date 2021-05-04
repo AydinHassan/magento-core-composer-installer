@@ -38,7 +38,7 @@ class CoreManagerTest extends \PHPUnit\Framework\TestCase
     protected $tmpDir;
     protected $httpDownloader;
 
-    public function setUp()
+    public function setUp(): void
     {
         $this->config = new Config();
         $this->composer = new Composer();
@@ -461,7 +461,7 @@ class CoreManagerTest extends \PHPUnit\Framework\TestCase
         );
     }
 
-    public function tearDown()
+    public function tearDown(): void
     {
         if (file_exists('htdocs')) {
             $fs = new Filesystem;
