@@ -33,6 +33,4 @@ jobs:
           vendor/bin/phpunit --coverage-clover ./build/logs/clover.xml
 
       - name: Run phpcs
-        run: |
-          vendor/bin/phpcs --standard=PSR2 ./src/
-          vendor/bin/phpcs --standard=PSR2 ./test/
+        run: composer cs
